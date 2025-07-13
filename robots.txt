@@ -1,1 +1,1 @@
-Sitemap: https://expopt.github.io/expopt/sitemap.xml
+Sitemap: http://expopt.org/sitemap.xml
