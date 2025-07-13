@@ -5,6 +5,6 @@
 
   # ExpOpt's Website
 
-  Visit **[expopt.github.io/expopt](https://expopt.github.io/expopt)** 🚀
+  Visit **[www.expopt.org](http://www.expopt.org)** 🚀
 
   _Built with [Lab Website Template](https://greene-lab.gitbook.io/lab-website-template-docs)_
