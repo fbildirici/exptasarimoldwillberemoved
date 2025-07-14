@@ -3,8 +3,6 @@
   ![on-pull-request](../../actions/workflows/on-pull-request.yaml/badge.svg)
   ![on-schedule](../../actions/workflows/on-schedule.yaml/badge.svg)
 
-  # ExpOpt's Website
+# Explainable Optimization (XOpt)
 
-  Visit **[www.expopt.org](http://www.expopt.org)** 🚀
-
-  _Built with [Lab Website Template](https://greene-lab.gitbook.io/lab-website-template-docs)_
+Please visit **[www.expopt.org](http://www.expopt.org)**
