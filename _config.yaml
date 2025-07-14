@@ -1,7 +1,7 @@
 # site properties and page defaults
 title: Explainable Optimization (XOpt)
-subtitle: 
-description: We are a group of researchers from University of Amsterdam (UvA) working on explainable optimization.
+subtitle: Managed by XOpt Team @ UvA
+description: A websited dedicated to collect and promote the recent research on explainable optimization (XOpt).
 header: images/background.jpg
 footer: images/background.jpg
 proofer: false
