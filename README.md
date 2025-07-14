@@ -7,4 +7,4 @@
 
 Please visit **[www.expopt.org](https://www.expopt.org)**
 
-![XOpt](images/XOptLogo_small.png)
+![XOpt](images/logo_full_transparent.png)
