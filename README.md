@@ -6,3 +6,5 @@
 # Explainable Optimization (XOpt)
 
 Please visit **[www.expopt.org](http://www.expopt.org)**
+
+![XOpt](images/XOptLogo_small.png)
