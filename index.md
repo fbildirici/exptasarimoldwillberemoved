@@ -1,9 +1,9 @@
 ---
 ---
 
-# ExpOpt's Website
+# The World of XOpt
 
-An engaging 1-3 sentence description of your lab.
+We are a team of researchers working on exlainable optimization (XOpt) at University of Amsterdam (UvA). We maintain this website to collect and promote recent research on XOpt. Please feel free to reach us if you would like to see your work to be listed here.
 
 {% include section.html %}
 
