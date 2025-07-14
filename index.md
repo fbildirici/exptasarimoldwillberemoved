@@ -3,7 +3,7 @@
 
 # The World of XOpt
 
-We are a team of researchers working on exlainable optimization (XOpt) at University of Amsterdam (UvA). We maintain this website to collect and promote recent research on XOpt. Please feel free to reach us if you would like to see your work to be listed here.
+We are a team of researchers working on exlainable optimization (XOpt) at the University of Amsterdam (UvA). We maintain this website to collect and promote recent research on XOpt. Please feel free to reach us if you would like to see your work listed here.
 
 {% include section.html %}
 
