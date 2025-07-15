@@ -9,6 +9,6 @@ We are a team of researchers working on exlainable optimization (XOpt) at the Un
 
 **[www.expopt.org](https://www.expopt.org)**
 
-Please feel free to reach us if you would like to see your work listed here.
+Please feel free to reach us if you would like to see your work listed on the website.
 
 ![XOpt](images/logo_full_transparent.png)
