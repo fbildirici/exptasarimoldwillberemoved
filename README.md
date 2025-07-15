@@ -3,8 +3,12 @@
   ![on-pull-request](../../actions/workflows/on-pull-request.yaml/badge.svg)
   ![on-schedule](../../actions/workflows/on-schedule.yaml/badge.svg)
 
-# Explainable Optimization (XOpt)
+# The World of Explainable Optimization
 
-Please visit **[www.expopt.org](https://www.expopt.org)**
+We are a team of researchers working on exlainable optimization (XOpt) at the University of Amsterdam (UvA). We maintain the following website to collect and promote recent research on XOpt:
+
+**[www.expopt.org](https://www.expopt.org)**
+
+Please feel free to reach us if you would like to see your work listed here.
 
 ![XOpt](images/logo_full_transparent.png)
