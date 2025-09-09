@@ -286,14 +286,18 @@
     color: #555;
     pointer-events: none;
     user-select: none;
+    display: block;
   }
-  .alps-slider-labels span {
+  .alps-slider-labels .alps-slider-label {
     position: absolute;
     top: 0;
+    left: 0;
     transform: translateX(-50%);
     white-space: nowrap;
     min-width: 18px;
     text-align: center;
+    pointer-events: none;
+    user-select: none;
   }
   @media (max-width: 400px) {
     .alps-slider { max-width: 100%; }
@@ -303,19 +307,9 @@
   </style>
   <script>
     // --- PaperList logic ---
-    const TYPE_LABELS = [
-      "dynamic / data structure",
-      "online",
-      "running time",
-      "approximation",
-      "streaming",
-      "game theory / mechanism design",
-      "differential privacy",
-      "survey"
-    ];
-    const PRIOR_LABEL = "prior/related work";
+    // TYPE_LABELS, PRIOR_LABEL already declared above
     let papers = [];
-    let selectedLabels = [];
+    // selectedLabels already declared above
     let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
     let allLabels = [];
     let yearSliderApi = null;
@@ -366,21 +360,38 @@
       html += '</div>';
       labelsCont.innerHTML = html;
     }
-    function renderFilters() {
-      let chipFilters = document.getElementById('chip-filters');
-      chipFilters.innerHTML = '';
-      // Show type labels first, then prior, then others
-      TYPE_LABELS.concat([PRIOR_LABEL]).forEach(label => { chipFilters.appendChild(labelChip(label)); });
-      allLabels.filter(l => !TYPE_LABELS.includes(l) && l !== PRIOR_LABEL).sort().forEach(label => { chipFilters.appendChild(labelChip(label)); });
+    function renderLabels() {
+      const labelsCont = document.getElementById('year-slider-labels');
+      if (!labelsCont) return;
+      // Remove any previous .alps-slider-labels
+      labelsCont.innerHTML = '';
+      // --- Calculate label positions and seyrelt ---
+      const minGap = 28; // px
+      const n = years.length <= 7 ? years.length : Math.max(6, Math.min(10, years.length));
+      let idxs = [];
+      for (let i = 0; i < n; ++i) idxs.push(Math.round(i*(years.length-1)/(n-1)));
+      // Calculate pixel positions for each label
+      const sliderTrack = container.querySelector('.alps-slider__track');
+      const trackRect = sliderTrack ? sliderTrack.getBoundingClientRect() : {width: container.offsetWidth};
+      const trackW = trackRect.width || container.offsetWidth;
+      let labelPos = idxs.map(idx => Math.round((idx/(years.length-1))*trackW));
+      // Seyrelt: soldan sağa, minGap'ten yakın olanları atla
+      let filtered = [];
+      let lastX = -Infinity;
+      for (let i = 0; i < idxs.length; ++i) {
+        if (labelPos[i] - lastX >= minGap || i === idxs.length-1 || i === 0) {
+          filtered.push({idx: idxs[i], pos: labelPos[i]});
+          lastX = labelPos[i];
+        }
+      }
+      // Render
+      let html = '';
+      for (const {idx, pos} of filtered) {
+        const percent = (idx/(years.length-1))*100;
+        html += `<span class="alps-slider-label" style="left:${percent}%">'${String(years[idx]).slice(-2)}</span>`;
+      }
+      labelsCont.innerHTML = `<div class="alps-slider-labels">${html}</div>`;
     }
-    function labelChip(label) {
-      const span = document.createElement('span');
-      span.className = 'chip';
-      if (TYPE_LABELS && TYPE_LABELS.includes(label)) span.classList.add('type');
-      // ...existing code...
-    }
-    (function(){
-      let papers = [];
       let years = [];
       let selectedLabels = [];
       let selectedYearRange = [];
@@ -497,8 +508,10 @@
         }
         thumbMin.addEventListener('keydown', e => handleKey(e, 'min'));
         thumbMax.addEventListener('keydown', e => handleKey(e, 'max'));
-        window.addEventListener('resize', updateUI);
-        updateUI();
+      window.addEventListener('resize', updateUI);
+      window.addEventListener('resize', renderLabels);
+      updateUI();
+      renderLabels();
         return {
           getIndices: () => [minIdx, maxIdx],
           setIndices: ([a, b]) => { minIdx = Math.max(0, Math.min(a, b)); maxIdx = Math.min(years.length-1, Math.max(a, b)); updateUI(); fireChange(); }
@@ -640,5 +653,5 @@
           renderFilters();
           renderPapers();
         });
-    })();
+  // End of script
       </script>
