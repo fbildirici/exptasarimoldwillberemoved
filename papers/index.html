@@ -236,8 +236,10 @@
   <div class="paperlist-container">
     <div class="paperlist-main">
       <div class="paperlist-controls">
-  <div class="paperlist-slider"></div>
-  <div class="slider-labels" id="year-slider-labels"></div>
+        <label for="year-start" style="font-weight:500;margin-right:4px;">Start:</label>
+        <select id="year-start" class="paperlist-sort" style="min-width:80px;"></select>
+        <label for="year-end" style="font-weight:500;margin:0 4px 0 12px;">End:</label>
+        <select id="year-end" class="paperlist-sort" style="min-width:80px;"></select>
         <select id="sort-filter" class="paperlist-sort">
           <option value="desc">Newest first</option>
           <option value="asc">Oldest first</option>
@@ -315,9 +317,8 @@
     // TYPE_LABELS, PRIOR_LABEL already declared above
     let papers = [];
     // selectedLabels already declared above
-    let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
-    let allLabels = [];
-    let yearSliderApi = null;
+  let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
+  let allLabels = [];
     // Fetch and preprocess papers
     fetch('/_data/papers.json')
       .then(r => r.json())
@@ -334,60 +335,34 @@
         yearMax = allYears[allYears.length-1] || 2025;
         yearRange = [yearMin, yearMax];
         allLabels = Array.from(new Set(papers.flatMap(p => Array.isArray(p.labels) ? p.labels : [])));
-        // Init new slider
-        yearSliderApi = initYearSlider({
-          container: document.querySelector('.paperlist-slider'),
-          years: allYears,
-          initial: [0, allYears.length-1],
-          onChange: ({minIndex, maxIndex, minYear, maxYear}) => {
-            yearRange = [minYear, maxYear];
-            renderYearLabels();
-            renderPapers();
-          }
+        // Populate dropdowns
+        const startSel = document.getElementById('year-start');
+        const endSel = document.getElementById('year-end');
+        startSel.innerHTML = '';
+        endSel.innerHTML = '';
+        allYears.forEach(y => {
+          startSel.innerHTML += `<option value="${y}">${y}</option>`;
+          endSel.innerHTML += `<option value="${y}">${y}</option>`;
         });
-        renderYearLabels();
+        startSel.value = yearMin;
+        endSel.value = yearMax;
+        startSel.onchange = endSel.onchange = function() {
+          let start = parseInt(startSel.value);
+          let end = parseInt(endSel.value);
+          if (start > end) {
+            // Swap if needed
+            [start, end] = [end, start];
+            startSel.value = start;
+            endSel.value = end;
+          }
+          yearRange = [start, end];
+          renderPapers();
+        };
         renderFilters();
         renderPapers();
       });
 
-    function renderYearLabels() {
-      const labelsCont = document.getElementById('year-slider-labels');
-      if (!labelsCont) return;
-      // Always show first and last year, and spread marks in between
-      let n = allYears.length <= 7 ? allYears.length : Math.max(6, Math.min(10, allYears.length));
-      let idxs = [0];
-      if (n > 2) {
-        for (let i = 1; i < n - 1; ++i) {
-          idxs.push(Math.round(i * (allYears.length - 1) / (n - 1)));
-        }
-      }
-      if (allYears.length > 1) idxs.push(allYears.length - 1);
-      // Remove duplicates and sort
-      idxs = Array.from(new Set(idxs)).sort((a, b) => a - b);
-      let html = '<div class="alps-slider-labels">';
-      for (let i = 0; i < idxs.length; ++i) {
-        const idx = idxs[i];
-        let style = '';
-        let label = '';
-        if (idx === 0) {
-          // First year: far left, bold, full year
-          style = 'left:0%;transform:translateX(0);font-weight:bold;';
-          label = allYears[idx];
-        } else if (idx === allYears.length - 1) {
-          // Last year: far right, bold, short year
-          style = 'left:100%;transform:translateX(-100%);font-weight:bold;';
-          label = "'" + String(allYears[idx]).slice(-2);
-        } else {
-          // Middle years: bold, short year
-          const percent = (idx / (allYears.length - 1)) * 100;
-          style = `left:${percent}%;transform:translateX(-50%);font-weight:bold;`;
-          label = "'" + String(allYears[idx]).slice(-2);
-        }
-        html += `<span class="alps-slider-label" style="${style}">${label}</span>`;
-      }
-      html += '</div>';
-      labelsCont.innerHTML = html;
-    }
+  // Slider label rendering removed for dropdown version
     function renderLabels() {
       const labelsCont = document.getElementById('year-slider-labels');
       if (!labelsCont) return;
@@ -543,7 +518,8 @@
         return order === 'desc' ? Math.max(...ys, 0) : Math.min(...ys, 9999);
       }
       function renderPapers() {
-        const [yf, yt] = selectedYearRange.length ? selectedYearRange : [years[0], years[years.length-1]];
+        // Use dropdowns for year range
+        const [yf, yt] = yearRange.length ? yearRange : [yearMin, yearMax];
         let filtered = papers.filter(p => {
           const paperYears = extractYears(p);
           const inRange = paperYears.some(y => y >= yf && y <= yt);
