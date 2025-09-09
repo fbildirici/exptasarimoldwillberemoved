@@ -18,171 +18,171 @@ permalink: /papers/
   border-radius: 18px;
   background: var(--background, #fff);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  padding: 32px 28px 24px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  transition: box-shadow .2s;
-}
-.citation:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
-}
-.citation-title {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-.citation-authors {
-  color: #878787;
-  font-size: 1em;
-  margin-bottom: 2px;
-}
-.citation-details {
-  color: #555;
-  font-size: 0.98em;
-  margin-bottom: 2px;
-}
-.citation-description {
-  color: #666;
-  font-size: 0.97em;
-  margin-bottom: 2px;
-}
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.tag {
-  background: #e3f2fd;
-  color: #1976d2;
-  border-radius: 999px;
-  padding: 3px 14px;
-  font-size: 0.93em;
-  cursor: pointer;
-  user-select: none;
-  border: 1px solid #90caf9;
-  transition: background .2s, color .2s;
-}
-.tag[data-active], .tag.active {
-  background: #1976d2;
-  color: #fff;
-  border: 1px solid #1976d2;
-}
-@media (max-width: 600px) {
-  .citation { padding: 18px 6px; }
-}
-</style>
-<section class="background" data-size="page">
-  <h1 id="papers">
-    <i class="icon fa-solid fa-scroll"></i> Papers
-  </h1>
-  <p>Our published papers on explainable optimization notes.</p>
-</section>
-<section class="background" data-size="page">
-  <div class="search-box">
-    <input type="text" id="search-input" class="search-input" placeholder="Search papers, authors, abstract..." oninput="renderPapers()">
-    <button data-tooltip="Clear search" aria-label="clear search" onclick="clearSearch()">
-      <i class="icon fa-solid fa-magnifying-glass"></i>
-    </button>
 
+  <!-- PaperList Birebir UI/UX -->
   <link rel="stylesheet" href="/_styles/citation.css">
   <link rel="stylesheet" href="/_styles/search-box.css">
   <link rel="stylesheet" href="/_styles/search-info.css">
   <link rel="stylesheet" href="/_styles/tags.css">
   <link rel="stylesheet" href="/_styles/button.css">
-  <style>
+  <style type="text/css">
   body { background: #f7fafd; }
-  .paperlist-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5em;
-    align-items: center;
-    margin-bottom: 1.5em;
+  .paperlist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5em; margin-bottom: 1.5em; }
+  .paperlist-slider { width: 350px; max-width: 100%; margin-right: 1em; }
+  .paperlist-slider-labels { display: flex; justify-content: space-between; font-size: 0.95em; color: #555; margin-top: 2px; }
+  .paperlist-chips { display: flex; flex-direction: column; gap: 0.5em; min-width: 180px; }
+  .chip { display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 0.95em; margin: 2px 4px 2px 0; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; cursor: pointer; transition: background .2s, color .2s; }
+  .chip.selected { background: #1976d2; color: #fff; border: 1px solid #1976d2; }
+  .chip.type { background: #e8f5e9; color: #388e3c; border: 1px solid #81c784; }
+  .chip.type.selected { background: #388e3c; color: #fff; border: 1px solid #388e3c; }
+  .chip.prior { background: #f5f5f5; color: #757575; border: 1px solid #bdbdbd; }
+  .chip.prior.selected { background: #757575; color: #fff; border: 1px solid #757575; }
+  .chip.pub { background: #fff3e0; color: #ff9800; border: 1px solid #ffb300; font-weight: bold; }
+  .chip.pub.selected { background: #ff9800; color: #fff; border: 1px solid #ff9800; }
+  .paperlist-main { display: flex; flex-direction: row; gap: 2em; align-items: flex-start; }
+  .paperlist-list { flex: 1; }
+  .citation { margin: 18px 0; border-radius: 0; background: #fff; box-shadow: none; padding: 0 0 0 0; display: flex; flex-direction: row; align-items: flex-start; gap: 0; border-bottom: 1px solid #e0e0e0; }
+  .citation:last-child { border-bottom: none; }
+  .citation-content { flex: 1; padding: 12px 0; display: flex; flex-direction: row; align-items: center; gap: 2em; }
+  .citation-title { font-size: 1.08em; font-weight: bold; margin-bottom: 2px; color: #222; }
+  .citation-authors { color: #878787; font-size: 1em; margin-left: 1.5em; min-width: 180px; }
+  .citation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 2em; }
+  .citation-details { display: none; }
+  .citation-description { display: none; }
+  .paperlist-chips { min-width: 220px; }
+  @media (max-width: 900px) { .paperlist-main { flex-direction: column; gap: 1em; } .paperlist-chips { flex-direction: row; flex-wrap: wrap; min-width: unset; } .citation-content { flex-direction: column; align-items: flex-start; gap: 0.5em; } .citation-authors, .citation-chips { margin-left: 0; } }
+  @media (max-width: 600px) { .citation-content { padding: 6px 0; } .paperlist-bar { gap: 0.5em; } }
+  </style>
+  <section class="background" data-size="page">
+    <h1 id="papers">
+      <i class="icon fa-solid fa-scroll"></i> Papers
+    </h1>
+    <p>Our published papers on explainable optimization notes.</p>
+  </section>
+  <section class="background" data-size="page">
+    <div class="paperlist-bar">
+      <div class="paperlist-slider">
+        <input type="range" id="year-range" min="0" max="0" value="0" step="1" multiple style="width:100%;">
+        <div class="paperlist-slider-labels" id="year-slider-labels"></div>
+      </div>
+      <select id="sort-filter" onchange="renderPapers()">
+        <option value="desc">Newest first</option>
+        <option value="asc">Oldest first</option>
+      </select>
+      <span id="paper-count" style="font-size:1.1em;"></span>
+      <button id="reset-filters" class="button" style="display:none;" onclick="resetFilters()">Reset</button>
+    </div>
+    <div class="paperlist-main">
+      <div class="paperlist-list" id="papers-list"></div>
+      <div class="paperlist-chips" id="chip-filters"></div>
+    </div>
+  </section>
+  <script>
+  const TYPE_LABELS = [
+    "dynamic / data structure",
+    "online",
+    "running time",
+    "approximation",
+    "streaming",
+    "game theory / mechanism design",
+    "differential privacy",
+    "survey"
+  ];
+  const PRIOR_LABEL = "prior/related work";
+  let papers = [];
+  let selectedLabels = [];
+  let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
+    <style>
+    body { background: #f7fafd; }
+    .paperlist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5em; margin-bottom: 1.5em; }
+    .paperlist-slider { width: 350px; max-width: 100%; margin-right: 1em; }
+    .paperlist-slider-labels { display: flex; justify-content: space-between; font-size: 0.95em; color: #555; margin-top: 2px; }
+    .paperlist-chips { display: flex; flex-direction: column; gap: 0.5em; min-width: 180px; }
+    .chip { display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 0.95em; margin: 2px 4px 2px 0; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; cursor: pointer; transition: background .2s, color .2s; }
+    .chip.selected { background: #1976d2; color: #fff; border: 1px solid #1976d2; }
+    .chip.type { background: #e8f5e9; color: #388e3c; border: 1px solid #81c784; }
+    .chip.type.selected { background: #388e3c; color: #fff; border: 1px solid #388e3c; }
+    .chip.prior { background: #f5f5f5; color: #757575; border: 1px solid #bdbdbd; }
+    .chip.prior.selected { background: #757575; color: #fff; border: 1px solid #757575; }
+    .chip.pub { background: #fff3e0; color: #ff9800; border: 1px solid #ffb300; font-weight: bold; }
+    .chip.pub.selected { background: #ff9800; color: #fff; border: 1px solid #ff9800; }
+    .paperlist-main { display: flex; flex-direction: row; gap: 2em; align-items: flex-start; }
+    .paperlist-list { flex: 1; }
+    .citation { margin: 18px 0; border-radius: 0; background: #fff; box-shadow: none; padding: 0 0 0 0; display: flex; flex-direction: row; align-items: flex-start; gap: 0; border-bottom: 1px solid #e0e0e0; }
+    .citation:last-child { border-bottom: none; }
+    .citation-content { flex: 1; padding: 12px 0; display: flex; flex-direction: row; align-items: center; gap: 2em; }
+    .citation-title { font-size: 1.08em; font-weight: bold; margin-bottom: 2px; color: #222; }
+    .citation-authors { color: #878787; font-size: 1em; margin-left: 1.5em; min-width: 180px; }
+    .citation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 2em; }
+    .citation-details { display: none; }
+    .citation-description { display: none; }
+    .paperlist-chips { min-width: 220px; }
+    @media (max-width: 900px) { .paperlist-main { flex-direction: column; gap: 1em; } .paperlist-chips { flex-direction: row; flex-wrap: wrap; min-width: unset; } .citation-content { flex-direction: column; align-items: flex-start; gap: 0.5em; } .citation-authors, .citation-chips { margin-left: 0; } }
+    @media (max-width: 600px) { .citation-content { padding: 6px 0; } .paperlist-bar { gap: 0.5em; } }
+    </style>
+    renderFilters();
+    renderPapers();
   }
-  .paperlist-slider {
-    width: 320px;
-    max-width: 100%;
-    margin-right: 1em;
+
+  function renderPapers() {
+    const search = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
+    const sort = document.getElementById('sort-filter').value;
+    const yearIdx = document.getElementById('year-range').value;
+    const yearTo = allYears[yearIdx] || yearMax;
+    let filtered = papers.filter(p => {
+      let match = true;
+      if (search) {
+        match = (p.title && p.title.toLowerCase().includes(search)) ||
+                (p.authors && p.authors.toLowerCase().includes(search)) ||
+                (p.abstract && p.abstract.toLowerCase().includes(search));
+      }
+      if (p.year < yearMin || p.year > yearTo) match = false;
+      if (selectedLabels.length > 0) {
+        if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
+      }
+      return match;
+    });
+    filtered.sort((a, b) => {
+      if (sort === 'desc') return (b.year || 0) - (a.year || 0);
+      else return (a.year || 0) - (b.year || 0);
+    });
+    document.getElementById('paper-count').textContent = `${filtered.length} papers`;
+    const container = document.getElementById('papers-list');
+    container.innerHTML = '';
+    filtered.forEach(paper => {
+      const div = document.createElement('div');
+      div.className = 'citation';
+      // Publication chips (arXiv, CPM, etc.)
+      let pubChips = '';
+      if (Array.isArray(paper.publications)) {
+        pubChips = paper.publications.map(pub => {
+          let name = pub.displayName || pub.name || '';
+          let text = name + (pub.year ? ` '${String(pub.year).slice(-2)}` : '');
+          return `<span class='chip pub' onclick='window.open("${pub.url||'#'}","_blank")'>${text}</span>`;
+        }).join(' ');
+      }
+      // Label chips
+      let labelChips = '';
+      if (Array.isArray(paper.labels)) {
+        labelChips = paper.labels.map(l => {
+          let cls = 'chip';
+          if (TYPE_LABELS.includes(l)) cls += ' type';
+          if (l === PRIOR_LABEL) cls += ' prior';
+          return `<span class='${cls}'>${l}</span>`;
+        }).join(' ');
+      }
+      div.innerHTML = `
+        <div class="citation-content">
+          <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
+          <span class="citation-authors">${paper.authors || ''}</span>
+          <span class="citation-chips">${pubChips} ${labelChips}</span>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+    document.getElementById('reset-filters').style.display = (selectedLabels.length || (document.getElementById('year-range').value != allYears.length-1)) ? '' : 'none';
   }
-  .paperlist-chips {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-    min-width: 180px;
-  }
-  .chip {
-    display: inline-block;
-    padding: 4px 14px;
-    border-radius: 999px;
-    font-size: 0.95em;
-    margin: 2px 4px 2px 0;
-    background: #e3f2fd;
-    color: #1976d2;
-    border: 1px solid #90caf9;
-    cursor: pointer;
-    transition: background .2s, color .2s;
-  }
-  .chip.selected {
-    background: #1976d2;
-    color: #fff;
-    border: 1px solid #1976d2;
-  }
-  .chip.type {
-    background: #e8f5e9;
-    color: #388e3c;
-    border: 1px solid #81c784;
-  }
-  .chip.type.selected {
-    background: #388e3c;
-    color: #fff;
-    border: 1px solid #388e3c;
-  }
-  .chip.prior {
-    background: #f5f5f5;
-    color: #757575;
-    border: 1px solid #bdbdbd;
-  }
-  .chip.prior.selected {
-    background: #757575;
-    color: #fff;
-    border: 1px solid #757575;
-  }
-  .paperlist-main {
-    display: flex;
-    flex-direction: row;
-    gap: 2em;
-    align-items: flex-start;
-  }
-  .paperlist-list {
-    flex: 1;
-  }
-  .citation {
-    margin: 24px 0;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    padding: 24px 24px 18px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: box-shadow .2s;
-  }
-  .citation:hover {
-    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
-  }
-  .citation-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 2px;
-  }
-  .citation-authors {
-    color: #878787;
-    font-size: 1em;
-    margin-bottom: 2px;
-  }
-  .citation-details {
-    color: #555;
+  </script>
     font-size: 0.98em;
     margin-bottom: 2px;
   }
