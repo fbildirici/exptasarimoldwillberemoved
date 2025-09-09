@@ -6,13 +6,79 @@ permalink: /papers/
 
 
 
+
+<link rel="stylesheet" href="/_styles/citation.css">
+<link rel="stylesheet" href="/_styles/search-box.css">
+<link rel="stylesheet" href="/_styles/search-info.css">
+<link rel="stylesheet" href="/_styles/tags.css">
+<link rel="stylesheet" href="/_styles/button.css">
+<style>
+.citation {
+  margin: 32px 0;
+  border-radius: 18px;
+  background: var(--background, #fff);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  padding: 32px 28px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow .2s;
+}
+.citation:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+.citation-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.citation-authors {
+  color: #878787;
+  font-size: 1em;
+  margin-bottom: 2px;
+}
+.citation-details {
+  color: #555;
+  font-size: 0.98em;
+  margin-bottom: 2px;
+}
+.citation-description {
+  color: #666;
+  font-size: 0.97em;
+  margin-bottom: 2px;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 999px;
+  padding: 3px 14px;
+  font-size: 0.93em;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #90caf9;
+  transition: background .2s, color .2s;
+}
+.tag[data-active], .tag.active {
+  background: #1976d2;
+  color: #fff;
+  border: 1px solid #1976d2;
+}
+@media (max-width: 600px) {
+  .citation { padding: 18px 6px; }
+}
+</style>
 <section class="background" data-size="page">
   <h1 id="papers">
     <i class="icon fa-solid fa-scroll"></i> Papers
   </h1>
   <p>Our published papers on explainable optimization notes.</p>
 </section>
-
 <section class="background" data-size="page">
   <div class="search-box">
     <input type="text" id="search-input" class="search-input" placeholder="Search papers, authors, abstract..." oninput="renderPapers()">
@@ -30,16 +96,11 @@ permalink: /papers/
     <select id="journal-filter" onchange="renderPapers()">
       <option value="">All</option>
     </select>
-    <span id="tag-filters" style="display:flex;gap:0.5em;"></span>
+    <span id="tag-filters" class="tags"></span>
     <button id="reset-filters" class="button" style="margin-left:auto;display:none;" onclick="resetFilters()">Reset</button>
   </div>
   <div class="citation-container" id="papers-list"></div>
 </section>
-<link rel="stylesheet" href="/._styles/citation.css">
-<link rel="stylesheet" href="/._styles/search-box.css">
-<link rel="stylesheet" href="/._styles/search-info.css">
-<link rel="stylesheet" href="/._styles/tags.css">
-<link rel="stylesheet" href="/._styles/button.css">
 <script>
 let papers = [];
 let selectedTags = [];
@@ -79,7 +140,7 @@ function populateFilters() {
   tagFilters.innerHTML = '';
   Array.from(tagSet).sort().forEach(tag => {
     const chip = document.createElement('span');
-    chip.className = 'tag';
+    chip.className = 'tag' + (selectedTags.includes(tag) ? ' active' : '');
     chip.textContent = tag;
     chip.onclick = () => toggleTag(tag);
     if (selectedTags.includes(tag)) chip.setAttribute('data-active','1');
@@ -135,18 +196,15 @@ function renderPapers() {
   filtered.forEach(paper => {
     const div = document.createElement('div');
     div.className = 'citation';
-    // Card style
     div.innerHTML = `
-      <div class="citation-text">
-        <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
-        <span class="citation-authors">${paper.authors || ''}</span>
-        <span class="citation-details">
-          ${paper.journal ? `<span class='citation-publisher'>${paper.journal}</span> &nbsp;·&nbsp;` : ''}
-          ${paper.year ? `<span class='citation-date'>${paper.year}</span>` : ''}
-        </span>
-        ${paper.abstract ? `<span class="citation-description">${paper.abstract}</span>` : ''}
-        ${Array.isArray(paper.labels) && paper.labels.length ? `<span class='tags'>${paper.labels.map(l=>`<span class='tag'>${l}</span>`).join('')}</span>` : ''}
-      </div>
+      <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
+      <span class="citation-authors">${paper.authors || ''}</span>
+      <span class="citation-details">
+        ${paper.journal ? `<span class='citation-publisher'>${paper.journal}</span> &nbsp;·&nbsp;` : ''}
+        ${paper.year ? `<span class='citation-date'>${paper.year}</span>` : ''}
+      </span>
+      ${paper.abstract ? `<span class="citation-description">${paper.abstract}</span>` : ''}
+      ${Array.isArray(paper.labels) && paper.labels.length ? `<span class='tags'>${paper.labels.map(l=>`<span class='tag'>${l}</span>`).join('')}</span>` : ''}
     `;
     container.appendChild(div);
   });
