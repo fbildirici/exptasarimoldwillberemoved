@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>People</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; }
     .alps-header { background: #111; color: #fff; margin: 0 0 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
@@ -14,17 +13,16 @@
     .alps-nav a { color: #fff; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
     .alps-nav a:hover { background: #1976d2; }
     .people-md-container { max-width: 900px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
-    .people-md-container h1, .people-md-container h2, .people-md-container h3 { color: #1976d2; }
-    .people-md-container table { width: 100%; border-collapse: collapse; margin: 32px 0 0 0; }
-    .people-md-container th, .people-md-container td { padding: 18px 12px; border-bottom: 1.5px solid #e0e0e0; vertical-align: middle; }
-    .people-md-container th { background: #f3f7fa; color: #1976d2; font-size: 1.1em; text-align: left; }
-    .people-md-container td img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #1976d2; background: #eee; display: block; margin: 0 auto; }
-    .people-md-container .person-info { font-size: 1.08em; color: #222; line-height: 1.7; }
-    .people-md-container .person-info b { color: #1976d2; font-size: 1.08em; }
-    .people-md-container .person-info strong { color: #1976d2; }
-    .people-md-container .person-info a { color: #1976d2; text-decoration: none; }
-    .people-md-container .person-info a:hover { text-decoration: underline; }
-    @media (max-width: 900px) { .people-md-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .people-md-container td img { width: 70px; height: 70px; } }
+    .people-md-container h1 { color: #1976d2; }
+    .person-list { margin: 36px 0 0 0; }
+    .person-card { display: flex; align-items: flex-start; background: #f7f7f7; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); margin-bottom: 28px; padding: 24px 20px; }
+    .person-photo { flex: 0 0 110px; display: flex; align-items: center; justify-content: center; }
+    .person-photo img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #1976d2; background: #eee; }
+    .person-info { flex: 1 1 0; font-size: 1.08em; color: #222; line-height: 1.7; padding-left: 28px; }
+    .person-info b, .person-info strong { color: #1976d2; font-size: 1.08em; }
+    .person-info a { color: #1976d2; text-decoration: none; }
+    .person-info a:hover { text-decoration: underline; }
+    @media (max-width: 900px) { .people-md-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .person-photo { flex-basis: 70px; } .person-photo img { width: 70px; height: 70px; } .person-info { padding-left: 14px; } }
   </style>
 </head>
 <body>
@@ -40,25 +38,49 @@
       </nav>
     </div>
   </div>
-  <div class="people-md-container" id="people-md"></div>
-  <script type="text/markdown" id="people-md-src">
-# People
-
-| Fotoğraf | Akademik Ekip Bilgileri |
-|----------|--------------------------|
-| ![Foto 1](https://via.placeholder.com/100) | **Ad Soyad:** Dr. Ayşe Yılmaz  <br> **Uzmanlık Alanı:** Eğitim Teknolojileri <br> **Ünvan:** Doçent <br> **E-posta:** ayse.yilmaz@example.com |
-| ![Foto 2](https://via.placeholder.com/100) | **Ad Soyad:** Prof. Dr. Mehmet Kaya <br> **Uzmanlık Alanı:** Yapay Zekâ ve Veri Bilimi <br> **Ünvan:** Profesör <br> **E-posta:** mehmet.kaya@example.com |
-| ![Foto 3](https://via.placeholder.com/100) | **Ad Soyad:** Arş. Gör. Elif Demir <br> **Uzmanlık Alanı:** Sosyoloji <br> **Ünvan:** Araştırma Görevlisi <br> **E-posta:** elif.demir@example.com |
-| ![Foto 4](https://via.placeholder.com/100) | **Ad Soyad:** Dr. Ahmet Çelik <br> **Uzmanlık Alanı:** Tarih <br> **Ünvan:** Doktor Öğretim Üyesi <br> **E-posta:** ahmet.celik@example.com |
-
----
-
-*For collaboration or inquiries, see the [Contact](/contact/) page.*
-  </script>
-  <script>
-    // Render markdown to HTML
-    const md = document.getElementById('people-md-src').textContent;
-    document.getElementById('people-md').innerHTML = marked.parse(md);
-  </script>
+  <div class="people-md-container">
+    <h1>People</h1>
+    <div style="margin-bottom:24px;color:#444;font-size:1.13em;">Meet our team:</div>
+    <div class="person-list">
+      <div class="person-card">
+        <div class="person-photo"><img src="https://via.placeholder.com/100" alt="Prof. John Doe"></div>
+        <div class="person-info">
+          <b>Name:</b> Prof. John Doe<br>
+          <b>Expertise:</b> Artificial Intelligence<br>
+          <b>Title:</b> Professor<br>
+          <b>Email:</b> <a href="mailto:john.doe@example.com">john.doe@example.com</a>
+        </div>
+      </div>
+      <div class="person-card">
+        <div class="person-photo"><img src="https://via.placeholder.com/100" alt="Dr. Jane Doe"></div>
+        <div class="person-info">
+          <b>Name:</b> Dr. Jane Doe<br>
+          <b>Expertise:</b> Data Science<br>
+          <b>Title:</b> Associate Professor<br>
+          <b>Email:</b> <a href="mailto:jane.doe@example.com">jane.doe@example.com</a>
+        </div>
+      </div>
+      <div class="person-card">
+        <div class="person-photo"><img src="https://via.placeholder.com/100" alt="Dr. Alex Smith"></div>
+        <div class="person-info">
+          <b>Name:</b> Dr. Alex Smith<br>
+          <b>Expertise:</b> Machine Learning<br>
+          <b>Title:</b> Assistant Professor<br>
+          <b>Email:</b> <a href="mailto:alex.smith@example.com">alex.smith@example.com</a>
+        </div>
+      </div>
+      <div class="person-card">
+        <div class="person-photo"><img src="https://via.placeholder.com/100" alt="Dr. Emily Brown"></div>
+        <div class="person-info">
+          <b>Name:</b> Dr. Emily Brown<br>
+          <b>Expertise:</b> Optimization<br>
+          <b>Title:</b> Research Scientist<br>
+          <b>Email:</b> <a href="mailto:emily.brown@example.com">emily.brown@example.com</a>
+        </div>
+      </div>
+    </div>
+    <hr style="margin:32px 0 18px 0; border:none; border-top:1.5px solid #e0e0e0;"/>
+    <div style="font-size:1.08em; color:#444; margin-bottom:10px;">For collaboration or inquiries, see the <a href="/contact/">Contact</a> page.</div>
+  </div>
 </body>
 </html>
