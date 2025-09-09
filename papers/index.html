@@ -230,7 +230,7 @@
 <body>
   <div class="alps-header">
     <div class="alps-header-bar">
-      <a class="alps-title" href="http://expopt.org" style="color:inherit;text-decoration:none;">Home</a>
+  <a class="alps-title" href="http://expopt.org" style="color:inherit;text-decoration:none;">ExpOpt</a>
     </div>
   </div>
   <div class="paperlist-container">
@@ -353,13 +353,17 @@
     function renderYearLabels() {
       const labelsCont = document.getElementById('year-slider-labels');
       if (!labelsCont) return;
-      // Use short year marks as in MUI: e.g., '23
+      // Always show first and last year, and spread marks in between
       let n = allYears.length <= 7 ? allYears.length : Math.max(6, Math.min(10, allYears.length));
-      let idxs = [];
-      for (let i = 0; i < n; ++i) {
-        idxs.push(Math.round(i * (allYears.length - 1) / (n - 1)));
+      let idxs = [0];
+      if (n > 2) {
+        for (let i = 1; i < n - 1; ++i) {
+          idxs.push(Math.round(i * (allYears.length - 1) / (n - 1)));
+        }
       }
-      // Calculate percent positions for each label (MUI-like)
+      if (allYears.length > 1) idxs.push(allYears.length - 1);
+      // Remove duplicates and sort
+      idxs = Array.from(new Set(idxs)).sort((a, b) => a - b);
       let html = '<div class="alps-slider-labels">';
       for (let i = 0; i < idxs.length; ++i) {
         const idx = idxs[i];
