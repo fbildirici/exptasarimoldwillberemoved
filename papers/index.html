@@ -367,13 +367,23 @@
       let html = '<div class="alps-slider-labels">';
       for (let i = 0; i < idxs.length; ++i) {
         const idx = idxs[i];
-        const percent = (idx / (allYears.length - 1)) * 100;
-        // Show full year for the first label under the left thumb
+        let style = '';
+        let label = '';
         if (idx === 0) {
-          html += `<span class=\"alps-slider-label\" style=\"left:${percent}%;transform:translateX(-10%);font-weight:bold;\">${allYears[idx]}</span>`;
+          // First year: far left, bold, full year
+          style = 'left:0%;transform:translateX(0);font-weight:bold;';
+          label = allYears[idx];
+        } else if (idx === allYears.length - 1) {
+          // Last year: far right, bold, short year
+          style = 'left:100%;transform:translateX(-100%);font-weight:bold;';
+          label = "'" + String(allYears[idx]).slice(-2);
         } else {
-          html += `<span class=\"alps-slider-label\" style=\"left:${percent}%;transform:translateX(-50%);\">'${String(allYears[idx]).slice(-2)}</span>`;
+          // Middle years: bold, short year
+          const percent = (idx / (allYears.length - 1)) * 100;
+          style = `left:${percent}%;transform:translateX(-50%);font-weight:bold;`;
+          label = "'" + String(allYears[idx]).slice(-2);
         }
+        html += `<span class="alps-slider-label" style="${style}">${label}</span>`;
       }
       html += '</div>';
       labelsCont.innerHTML = html;
