@@ -363,32 +363,32 @@
     function renderLabels() {
       const labelsCont = document.getElementById('year-slider-labels');
       if (!labelsCont) return;
-      // Remove any previous .alps-slider-labels
       labelsCont.innerHTML = '';
-      // --- Calculate label positions and seyrelt ---
       const minGap = 28; // px
       const n = years.length <= 7 ? years.length : Math.max(6, Math.min(10, years.length));
       let idxs = [];
       for (let i = 0; i < n; ++i) idxs.push(Math.round(i*(years.length-1)/(n-1)));
-      // Calculate pixel positions for each label
+      // Get track position relative to parent
       const sliderTrack = container.querySelector('.alps-slider__track');
-      const trackRect = sliderTrack ? sliderTrack.getBoundingClientRect() : {width: container.offsetWidth};
+      const parentRect = container.getBoundingClientRect();
+      const trackRect = sliderTrack ? sliderTrack.getBoundingClientRect() : {left:0, width:container.offsetWidth};
+      const trackLeft = trackRect.left - parentRect.left;
       const trackW = trackRect.width || container.offsetWidth;
-      let labelPos = idxs.map(idx => Math.round((idx/(years.length-1))*trackW));
-      // Seyrelt: soldan sağa, minGap'ten yakın olanları atla
+      // Calculate pixel positions for each label (relative to container)
+      let labelPos = idxs.map(idx => trackLeft + Math.round((idx/(years.length-1))*trackW));
+      // Seyrelt: soldan sağa, minGap'ten yakın olanları atla (ilk ve son hariç)
       let filtered = [];
       let lastX = -Infinity;
       for (let i = 0; i < idxs.length; ++i) {
-        if (labelPos[i] - lastX >= minGap || i === idxs.length-1 || i === 0) {
-          filtered.push({idx: idxs[i], pos: labelPos[i]});
+        if (i === 0 || i === idxs.length-1 || labelPos[i] - lastX >= minGap) {
+          filtered.push({idx: idxs[i], px: labelPos[i]});
           lastX = labelPos[i];
         }
       }
       // Render
       let html = '';
-      for (const {idx, pos} of filtered) {
-        const percent = (idx/(years.length-1))*100;
-        html += `<span class="alps-slider-label" style="left:${percent}%">'${String(years[idx]).slice(-2)}</span>`;
+      for (const {idx, px} of filtered) {
+        html += `<span class="alps-slider-label" style="left:${px}px">'${String(years[idx]).slice(-2)}</span>`;
       }
       labelsCont.innerHTML = `<div class="alps-slider-labels">${html}</div>`;
     }
