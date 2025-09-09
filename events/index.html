@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; }
+    .alps-header { background: #111; color: #fff; margin: 0 0 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .alps-header-bar { display: flex; align-items: center; padding: 0 24px; height: 64px; }
+    .alps-title { font-size: 2rem; font-weight: bold; margin-right: 32px; color: #fff; text-decoration: none; }
+    .alps-nav { display: flex; gap: 8px; }
+    .alps-nav a { color: #fff; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+    .alps-nav a:hover { background: #1976d2; }
+    .events-container { max-width: 900px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
+    .events-container h1 { color: #1976d2; }
+    .event-list { margin: 36px 0 0 0; display: flex; flex-wrap: wrap; gap: 28px; }
+    .event-card { background: #f7f7f7; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); padding: 24px 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: space-between; }
+    .event-title { font-size: 1.25em; font-weight: bold; color: #1976d2; margin-bottom: 8px; }
+    .event-date { color: #555; font-size: 1.05em; margin-bottom: 4px; }
+    .event-location { color: #888; font-size: 1em; margin-bottom: 10px; }
+    .event-description { color: #222; font-size: 1.08em; margin-bottom: 12px; }
+    .event-link { color: #1976d2; text-decoration: none; font-weight: 500; }
+    .event-link:hover { text-decoration: underline; }
+    @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { flex-direction: column; gap: 18px; } .event-card { max-width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="alps-header">
+    <div class="alps-header-bar">
+      <a class="alps-title" href="/">ExpOpt</a>
+      <nav class="alps-nav">
+        <a href="/">Home</a>
+        <a href="/papers/">Papers</a>
+        <a href="/events/">Events</a>
+        <a href="/people/">People</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </div>
+  <div class="events-container">
+    <h1>Events</h1>
+    <div style="margin-bottom:24px;color:#444;font-size:1.13em;">Upcoming and past events organized or attended by our group:</div>
+    <div class="event-list" id="event-list"></div>
+  </div>
+  <script>
+    fetch('/_data/events.json')
+      .then(response => response.json())
+      .then(events => {
+        const list = document.getElementById('event-list');
+        if (!Array.isArray(events) || events.length === 0) {
+          list.innerHTML = '<div style="color:#888;">No events found.</div>';
+          return;
+        }
+        events.forEach(event => {
+          const card = document.createElement('div');
+          card.className = 'event-card';
+          card.innerHTML = `
+            <div class="event-title">${event.title}</div>
+            <div class="event-date"><b>Date:</b> ${event.date}</div>
+            <div class="event-location"><b>Location:</b> ${event.location}</div>
+            <div class="event-description">${event.description}</div>
+            <a class="event-link" href="${event.link}" target="_blank">More Info</a>
+          `;
+          list.appendChild(card);
+        });
+      })
+      .catch(() => {
+        document.getElementById('event-list').innerHTML = '<div style="color:#888;">Could not load events.</div>';
+      });
+  </script>
+</body>
+</html>
