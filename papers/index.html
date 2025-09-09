@@ -1,268 +1,403 @@
----
-layout: default
-title: Papers
 
-<!-- PaperList Birebir UI/UX -->
-<link rel="stylesheet" href="/_styles/citation.css">
-<link rel="stylesheet" href="/_styles/search-box.css">
-<link rel="stylesheet" href="/_styles/search-info.css">
-<link rel="stylesheet" href="/_styles/tags.css">
-<link rel="stylesheet" href="/_styles/button.css">
-<style type="text/css">
-body { background: #f7fafd; }
-.paperlist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5em; margin-bottom: 1.5em; }
-.paperlist-slider { width: 350px; max-width: 100%; margin-right: 1em; }
-.paperlist-slider-labels { display: flex; justify-content: space-between; font-size: 0.95em; color: #555; margin-top: 2px; }
-.paperlist-chips { display: flex; flex-direction: column; gap: 0.5em; min-width: 180px; }
-.chip { display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 0.95em; margin: 2px 4px 2px 0; background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; cursor: pointer; transition: background .2s, color .2s; }
-.chip.selected { background: #1976d2; color: #fff; border: 1px solid #1976d2; }
-.chip.type { background: #e8f5e9; color: #388e3c; border: 1px solid #81c784; }
-.chip.type.selected { background: #388e3c; color: #fff; border: 1px solid #388e3c; }
-.chip.prior { background: #f5f5f5; color: #757575; border: 1px solid #bdbdbd; }
-.chip.prior.selected { background: #757575; color: #fff; border: 1px solid #757575; }
-.chip.pub { background: #fff3e0; color: #ff9800; border: 1px solid #ffb300; font-weight: bold; }
-.chip.pub.selected { background: #ff9800; color: #fff; border: 1px solid #ff9800; }
-.paperlist-main { display: flex; flex-direction: row; gap: 2em; align-items: flex-start; }
-.paperlist-list { flex: 1; }
-.citation { margin: 18px 0; border-radius: 0; background: #fff; box-shadow: none; padding: 0 0 0 0; display: flex; flex-direction: row; align-items: flex-start; gap: 0; border-bottom: 1px solid #e0e0e0; }
-.citation:last-child { border-bottom: none; }
-.citation-content { flex: 1; padding: 12px 0; display: flex; flex-direction: row; align-items: center; gap: 2em; }
-.citation-title { font-size: 1.08em; font-weight: bold; margin-bottom: 2px; color: #222; }
-.citation-authors { color: #878787; font-size: 1em; margin-left: 1.5em; min-width: 180px; }
-.citation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-left: 2em; }
-.citation-details { display: none; }
-.citation-description { display: none; }
-.paperlist-chips { min-width: 220px; }
-@media (max-width: 900px) { .paperlist-main { flex-direction: column; gap: 1em; } .paperlist-chips { flex-direction: row; flex-wrap: wrap; min-width: unset; } .citation-content { flex-direction: column; align-items: flex-start; gap: 0.5em; } .citation-authors, .citation-chips { margin-left: 0; } }
-@media (max-width: 600px) { .citation-content { padding: 6px 0; } .paperlist-bar { gap: 0.5em; } }
-</style>
-<section class="background" data-size="page">
-  <h1 id="papers">
-    <i class="icon fa-solid fa-scroll"></i> Papers
-  </h1>
-  <p>Our published papers on explainable optimization notes.</p>
-  <div class="paperlist-bar">
-    <div class="paperlist-slider">
-      <input type="range" id="year-range" min="0" max="0" value="0" step="1" multiple style="width:100%;">
-      <div class="paperlist-slider-labels" id="year-slider-labels"></div>
-    </div>
-    <input type="text" id="search-input" class="search-input" placeholder="Search papers, authors, abstract..." oninput="renderPapers()" style="min-width:200px;">
-    <select id="sort-filter" onchange="renderPapers()">
-      <option value="desc">Newest first</option>
-      <option value="asc">Oldest first</option>
-    </select>
-    <span id="paper-count" style="font-size:1.1em;"></span>
-    <button id="reset-filters" class="button" style="display:none;" onclick="resetFilters()">Reset</button>
-  </div>
-  <div class="paperlist-main">
-    <div class="paperlist-list" id="papers-list"></div>
-    <div class="paperlist-chips" id="chip-filters"></div>
-  </div>
-</section>
-      if (Array.isArray(paper.labels)) {
-        labelChips = paper.labels.map(l => {
-          let cls = 'chip';
-          if (TYPE_LABELS.includes(l)) cls += ' type';
-          if (l === PRIOR_LABEL) cls += ' prior';
-          return `<span class='${cls}'>${l}</span>`;
-        }).join(' ');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Papers</title>
+  <link rel="stylesheet" href="/_styles/citation.css">
+  <link rel="stylesheet" href="/_styles/tags.css">
+  <link rel="stylesheet" href="/_styles/button.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f7f7f7;
+    }
+    .alps-header {
+      background: #455a64;
+      color: #fff;
+      padding: 0;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .alps-header-bar {
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      height: 64px;
+    }
+    .alps-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-right: 32px;
+    }
+    .alps-nav {
+      display: flex;
+      gap: 8px;
+    }
+    .alps-nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .alps-nav a:hover {
+      background: #607d8b;
+    }
+    .paperlist-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      padding: 24px 24px 32px 24px;
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+    }
+    .paperlist-main {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .paperlist-controls {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .paperlist-slider {
+      flex: 1 1 0;
+      min-width: 220px;
+      max-width: 350px;
+      margin-right: 12px;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95em;
+      color: #888;
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+    .paperlist-sort {
+      min-width: 140px;
+      font-size: 1em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      background: #f7f7f7;
+      color: #333;
+    }
+    .paperlist-count {
+      font-size: 1.1em;
+      color: #444;
+      margin-left: 8px;
+    }
+    .reset-btn {
+      background: #e53935;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      margin-left: 12px;
+      transition: background 0.2s;
+    }
+    .reset-btn:hover {
+      background: #b71c1c;
+    }
+    .paperlist-list {
+      margin-top: 12px;
+    }
+    .paperlist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 18px 0 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .paperlist-item:last-child {
+      border-bottom: none;
+    }
+    .paper-title {
+      font-weight: bold;
+      font-size: 1.08em;
+      margin-bottom: 2px;
+      color: #222;
+      text-decoration: none;
+    }
+    .paper-title:hover {
+      text-decoration: underline;
+    }
+    .paper-authors {
+      color: #888;
+      font-size: 0.98em;
+      margin-bottom: 2px;
+    }
+    .paper-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 2px;
+    }
+    .chip {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 0.97em;
+      font-weight: 500;
+      background: #eee;
+      color: #444;
+      cursor: pointer;
+      user-select: none;
+      border: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .chip.type {
+      background: #43a047;
+      color: #fff;
+    }
+    .chip.prior {
+      background: #fff;
+      color: #666;
+      border: 1.5px solid #bbb;
+    }
+    .chip.selected {
+      background: #1976d2;
+      color: #fff;
+    }
+    .chip.pub {
+      background: #ffb300;
+      color: #fff;
+      font-weight: 600;
+      border: 1.5px solid #ffb300;
+    }
+    .chip.pub[variant="outlined"] {
+      background: #fff3e0;
+      color: #ff9800;
+      border: 1.5px solid #ffb300;
+    }
+    .sidebar {
+      min-width: 220px;
+      max-width: 260px;
+      padding-left: 12px;
+      border-left: 1.5px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-label {
+      font-size: 1.08em;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    .sidebar-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 900px) {
+      .paperlist-container {
+        flex-direction: column;
+        gap: 0;
+        padding: 10px 2vw 24px 2vw;
       }
-      div.innerHTML = `
-        <div class="citation-content">
-          <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
-          <span class="citation-authors">${paper.authors || ''}</span>
-          <span class="citation-chips">${pubChips} ${labelChips}</span>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-    document.getElementById('reset-filters').style.display = (selectedLabels.length || (document.getElementById('year-range').value != allYears.length-1)) ? '' : 'none';
-  }
-  </script>
-    font-size: 0.98em;
-    margin-bottom: 2px;
-  }
-  .citation-description {
-    color: #666;
-    font-size: 0.97em;
-    margin-bottom: 2px;
-  }
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  @media (max-width: 900px) {
-    .paperlist-main { flex-direction: column; gap: 1em; }
-    .paperlist-chips { flex-direction: row; flex-wrap: wrap; min-width: unset; }
-  }
-  @media (max-width: 600px) {
-    .citation { padding: 12px 4px; }
-    .paperlist-controls { gap: 0.5em; }
-  }
+      .sidebar {
+        border-left: none;
+        border-top: 1.5px solid #e0e0e0;
+        margin-top: 24px;
+        padding-left: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .sidebar-chips {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
   </style>
-  <section class="background" data-size="page">
-    <h1 id="papers">
-      <i class="icon fa-solid fa-scroll"></i> Papers
-    </h1>
-    <p>Our published papers on explainable optimization notes.</p>
-  </section>
-  <section class="background" data-size="page">
-    <div class="paperlist-controls">
-      <input type="text" id="search-input" class="search-input" placeholder="Search papers, authors, abstract..." oninput="renderPapers()">
-      <select id="sort-filter" onchange="renderPapers()">
-        <option value="desc">Newest first</option>
-        <option value="asc">Oldest first</option>
-      </select>
-      <select id="year-filter" onchange="renderPapers()">
-        <option value="">All years</option>
-      </select>
-      <select id="journal-filter" onchange="renderPapers()">
-        <option value="">All journals</option>
-      </select>
-      <button id="reset-filters" class="button" style="display:none;" onclick="resetFilters()">Reset</button>
+</head>
+<body>
+  <div class="alps-header">
+    <div class="alps-header-bar">
+      <span class="alps-title">Algorithms with Predictions</span>
+      <nav class="alps-nav">
+        <a href="/papers/">PAPER LIST</a>
+        <a href="#">FURTHER MATERIAL</a>
+        <a href="#">HOW TO CONTRIBUTE</a>
+        <a href="#">ABOUT</a>
+      </nav>
     </div>
+  </div>
+  <div class="paperlist-container">
     <div class="paperlist-main">
+      <div class="paperlist-controls">
+        <div class="paperlist-slider">
+          <input type="range" id="year-range" min="0" max="0" value="0" step="1" style="width:100%">
+          <div class="slider-labels" id="year-slider-labels"></div>
+        </div>
+        <select id="sort-filter" class="paperlist-sort">
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+        <span class="paperlist-count" id="paper-count"></span>
+        <button class="reset-btn" id="reset-filters" style="display:none;">Reset</button>
+      </div>
       <div class="paperlist-list" id="papers-list"></div>
-      <div class="paperlist-chips" id="chip-filters"></div>
     </div>
-    <div class="search-info" id="search-info"></div>
-  </section>
+    <div class="sidebar">
+      <div class="sidebar-label">Filter by label</div>
+      <div class="sidebar-chips" id="chip-filters"></div>
+    </div>
+  </div>
   <script>
-  const TYPE_LABELS = [
-    "dynamic / data structure",
-    "online",
-    "running time",
-    "approximation",
-    "streaming",
-    "game theory / mechanism design",
-    "differential privacy",
-    "survey"
-  ];
-  const PRIOR_LABEL = "prior/related work";
-  let papers = [];
-  let selectedLabels = [];
-  fetch('/_data/papers.json')
-    .then(r => r.json())
-    .then(data => {
-      papers = data.filter(p => typeof p === 'object' && p.title);
-      renderFilters();
-      renderPapers();
-    });
-
-  function renderFilters() {
-    // Years
-    const yearSet = new Set();
-    const journalSet = new Set();
+    // --- PaperList logic ---
+    const TYPE_LABELS = [
+      "dynamic / data structure",
+      "online",
+      "running time",
+      "approximation",
+      "streaming",
+      "game theory / mechanism design",
+      "differential privacy",
+      "survey"
+    ];
+    const PRIOR_LABEL = "prior/related work";
+    let papers = [];
+    let selectedLabels = [];
+    let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
     let allLabels = [];
-    papers.forEach(p => {
-      if (p.year) yearSet.add(p.year);
-      if (p.journal) journalSet.add(p.journal);
-      if (Array.isArray(p.labels)) allLabels = allLabels.concat(p.labels);
-    });
-    const yearFilter = document.getElementById('year-filter');
-    yearFilter.innerHTML = '<option value="">All years</option>';
-    Array.from(yearSet).sort((a,b)=>b-a).forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y; opt.textContent = y;
-      yearFilter.appendChild(opt);
-    });
-    const journalFilter = document.getElementById('journal-filter');
-    journalFilter.innerHTML = '<option value="">All journals</option>';
-    Array.from(journalSet).sort().forEach(j => {
-      const opt = document.createElement('option');
-      opt.value = j; opt.textContent = j;
-      journalFilter.appendChild(opt);
-    });
-    // Label chips
-    let distinctLabels = [...new Set(allLabels)].sort();
-    let chipFilters = document.getElementById('chip-filters');
-    chipFilters.innerHTML = '';
-    // Type labels first, then others
-    TYPE_LABELS.concat([PRIOR_LABEL]).forEach(label => {
-      chipFilters.appendChild(labelChip(label, true));
-    });
-    distinctLabels.filter(l => !TYPE_LABELS.includes(l) && l !== PRIOR_LABEL).forEach(label => {
-      chipFilters.appendChild(labelChip(label, true));
-    });
-  }
+    // Fetch and preprocess papers
+    fetch('/_data/papers.json')
+      .then(r => r.json())
+      .then(data => {
+        // Remove any non-object entries (e.g. legacy HTML)
+        papers = data.filter(p => typeof p === 'object' && p.title);
+        allYears = Array.from(new Set(papers.flatMap(p => p.year))).sort((a,b)=>a-b);
+        yearMin = allYears[0] || 2000;
+        yearMax = allYears[allYears.length-1] || 2025;
+        yearRange = [yearMin, yearMax];
+        allLabels = Array.from(new Set(papers.flatMap(p => Array.isArray(p.labels) ? p.labels : [])));
+        renderYearSlider();
+        renderFilters();
+        renderPapers();
+      });
 
-  function labelChip(label, deletable) {
-    const span = document.createElement('span');
-    span.className = 'chip';
-    if (TYPE_LABELS.includes(label)) span.classList.add('type');
-    if (label === PRIOR_LABEL) span.classList.add('prior');
-    if (selectedLabels.includes(label)) span.classList.add('selected');
-    span.textContent = label;
-    span.onclick = () => {
-      if (selectedLabels.includes(label)) {
-        selectedLabels = selectedLabels.filter(l => l !== label);
-      } else {
-        selectedLabels = [label, ...selectedLabels];
-      }
+    function renderYearSlider() {
+      const yearSlider = document.getElementById('year-range');
+      yearSlider.min = 0;
+      yearSlider.max = allYears.length-1;
+      yearSlider.value = allYears.length-1;
+      yearSlider.oninput = function() {
+        yearRange = [yearMin, allYears[this.value]];
+        renderYearLabels();
+        renderPapers();
+      };
+      renderYearLabels();
+    }
+    function renderYearLabels() {
+      const labels = allYears.map(y => "'"+String(y).slice(-2));
+      document.getElementById('year-slider-labels').innerHTML = labels.join(' ');
+    }
+    function renderFilters() {
+      let chipFilters = document.getElementById('chip-filters');
+      chipFilters.innerHTML = '';
+      // Show type labels first, then prior, then others
+      TYPE_LABELS.concat([PRIOR_LABEL]).forEach(label => { chipFilters.appendChild(labelChip(label)); });
+      allLabels.filter(l => !TYPE_LABELS.includes(l) && l !== PRIOR_LABEL).sort().forEach(label => { chipFilters.appendChild(labelChip(label)); });
+    }
+    function labelChip(label) {
+      const span = document.createElement('span');
+      span.className = 'chip';
+      if (TYPE_LABELS.includes(label)) span.classList.add('type');
+      if (label === PRIOR_LABEL) span.classList.add('prior');
+      if (selectedLabels.includes(label)) span.classList.add('selected');
+      span.textContent = label;
+      span.onclick = () => {
+        if (selectedLabels.includes(label)) {
+          selectedLabels = selectedLabels.filter(l => l !== label);
+        } else {
+          selectedLabels = [label, ...selectedLabels];
+        }
+        renderFilters();
+        renderPapers();
+      };
+      return span;
+    }
+    document.getElementById('reset-filters').onclick = function() {
+      selectedLabels = [];
+      document.getElementById('year-range').value = allYears.length-1;
+      yearRange = [yearMin, yearMax];
+      document.getElementById('sort-filter').value = 'desc';
       renderFilters();
       renderPapers();
     };
-    return span;
-  }
-
-  function resetFilters() {
-    document.getElementById('search-input').value = '';
-    document.getElementById('year-filter').value = '';
-    document.getElementById('journal-filter').value = '';
-    document.getElementById('sort-filter').value = 'desc';
-    selectedLabels = [];
-    renderFilters();
-    renderPapers();
-  }
-
-  function clearSearch() {
-    document.getElementById('search-input').value = '';
-    renderPapers();
-  }
-
-  function renderPapers() {
-    const search = document.getElementById('search-input').value.toLowerCase();
-    const year = document.getElementById('year-filter').value;
-    const journal = document.getElementById('journal-filter').value;
-    const sort = document.getElementById('sort-filter').value;
-    let filtered = papers.filter(p => {
-      let match = true;
-      if (search) {
-        match = (p.title && p.title.toLowerCase().includes(search)) ||
-                (p.authors && p.authors.toLowerCase().includes(search)) ||
-                (p.abstract && p.abstract.toLowerCase().includes(search));
-      }
-      if (year && p.year != year) match = false;
-      if (journal && p.journal != journal) match = false;
-      if (selectedLabels.length > 0) {
-        if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
-      }
-      return match;
-    });
-    filtered.sort((a, b) => {
-      if (sort === 'desc') return (b.year || 0) - (a.year || 0);
-      else return (a.year || 0) - (b.year || 0);
-    });
-    document.getElementById('search-info').textContent = `${filtered.length} papers`;
-    const container = document.getElementById('papers-list');
-    container.innerHTML = '';
-    filtered.forEach(paper => {
-      const div = document.createElement('div');
-      div.className = 'citation';
-      div.innerHTML = `
-        <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
-        <span class="citation-authors">${paper.authors || ''}</span>
-        <span class="citation-details">
-          ${paper.journal ? `<span class='citation-publisher'>${paper.journal}</span> &nbsp;·&nbsp;` : ''}
-          ${paper.year ? `<span class='citation-date'>${paper.year}</span>` : ''}
-        </span>
-        ${paper.abstract ? `<span class="citation-description">${paper.abstract}</span>` : ''}
-        ${Array.isArray(paper.labels) && paper.labels.length ? `<span class='tags'>${paper.labels.map(l=>`<span class='tag'>${l}</span>`).join('')}</span>` : ''}
-      `;
-      container.appendChild(div);
-    });
-    document.getElementById('reset-filters').style.display = (search || year || journal || selectedLabels.length) ? '' : 'none';
-  }
+    document.getElementById('sort-filter').onchange = function() {
+      renderPapers();
+    };
+    function renderPapers() {
+      const sort = document.getElementById('sort-filter').value;
+      const yearIdx = document.getElementById('year-range').value;
+      const yearTo = allYears[yearIdx] || yearMax;
+      let filtered = papers.filter(p => {
+        let match = true;
+        if (p.year < yearMin || p.year > yearTo) match = false;
+        if (selectedLabels.length > 0) {
+          if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
+        }
+        return match;
+      });
+      filtered.sort((a, b) => {
+        if (sort === 'desc') return (b.year || 0) - (a.year || 0);
+        else return (a.year || 0) - (b.year || 0);
+      });
+      document.getElementById('paper-count').textContent = `${filtered.length} papers`;
+      const container = document.getElementById('papers-list');
+      container.innerHTML = '';
+      filtered.forEach(paper => {
+        const div = document.createElement('div');
+        div.className = 'paperlist-item';
+        // Publication chips (arXiv, CPM, etc.)
+        let pubChips = '';
+        if (Array.isArray(paper.publications)) {
+          pubChips = paper.publications.map(pub => {
+            let name = pub.displayName || pub.name || '';
+            let text = name + (pub.year ? ` '${String(pub.year).slice(-2)}` : '');
+            let variant = (name === 'arXiv') ? 'outlined' : 'filled';
+            return `<span class='chip pub' variant='${variant}' onclick='window.open("${pub.url||'#'}","_blank")'>${text}</span>`;
+          }).join(' ');
+        }
+        // Label chips
+        let labelChips = '';
+        if (Array.isArray(paper.labels)) {
+          labelChips = paper.labels.map(l => {
+            let cls = 'chip';
+            if (TYPE_LABELS.includes(l)) cls += ' type';
+            if (l === PRIOR_LABEL) cls += ' prior';
+            return `<span class='${cls}'>${l}</span>`;
+          }).join(' ');
+        }
+        div.innerHTML = `
+          <div style="flex:1;min-width:0;">
+            <div class="paper-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</div>
+            <div class="paper-authors">${paper.authors || ''}</div>
+            <div class="paper-chips">${pubChips} ${labelChips}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      document.getElementById('reset-filters').style.display = (selectedLabels.length || (document.getElementById('year-range').value != allYears.length-1)) ? '' : 'none';
+    }
   </script>
+</body>
+</html>
