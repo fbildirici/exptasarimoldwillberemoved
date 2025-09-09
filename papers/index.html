@@ -1,13 +1,25 @@
+---
+layout: default
+title: Papers
+permalink: /papers/
+---
 
 <section class="background" data-size="page">
   <h1 id="papers">
-    <i class="icon fa-solid fa-scroll"></i>Papers
+    <i class="icon fa-solid fa-scroll"></i> Papers
   </h1>
   <p>Our published papers on explainable optimization.</p>
 </section>
 
 <section class="background" data-size="page">
-  <h2 id="all">All Papers</h2>
+  <div class="search-box">
+    <input type="text" class="search-input" oninput="onSearchInput(this)" placeholder="Search papers on this page">
+    <button disabled data-tooltip="Clear search" aria-label="clear search" onclick="onSearchClear()">
+      <i class="icon fa-solid fa-magnifying-glass"></i>
+    </button>
+  </div>
+  <div class="search-info"></div>
+
   <div class="citation-container">
     {% for paper in site.data.papers %}
       <div class="citation">
