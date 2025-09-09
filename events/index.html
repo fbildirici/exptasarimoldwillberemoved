@@ -19,11 +19,11 @@
   .event-image { flex: 0 0 260px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
   .event-image img { width: 220px; height: 220px; object-fit: cover; border-radius: 16px; margin: 18px; background: #fff; }
   .event-details { flex: 1 1 0; padding: 44px 48px; display: flex; flex-direction: column; justify-content: center; }
-  .event-title { font-size: 2.1em; font-weight: bold; color: #1976d2; margin-bottom: 18px; }
-  .event-date { color: #555; font-size: 1.25em; margin-bottom: 8px; }
-  .event-location { color: #888; font-size: 1.18em; margin-bottom: 18px; }
-  .event-description { color: #222; font-size: 1.25em; margin-bottom: 18px; }
-  .event-link { color: #1976d2; text-decoration: none; font-weight: 600; margin-top: 16px; font-size: 1.18em; display: inline-block; padding: 10px 24px; border-radius: 8px; background: #e3eafc; transition: background 0.2s; }
+  .event-title { font-size: 1.45em; font-weight: bold; color: #1976d2; margin-bottom: 10px; }
+  .event-date { color: #555; font-size: 1em; margin-bottom: 4px; }
+  .event-location { color: #888; font-size: 0.98em; margin-bottom: 10px; }
+  .event-description { color: #222; font-size: 1.05em; margin-bottom: 12px; }
+  .event-link { color: #1976d2; text-decoration: none; font-weight: 600; margin-top: 10px; font-size: 1em; display: inline-block; padding: 8px 18px; border-radius: 8px; background: #e3eafc; transition: background 0.2s; }
   .event-link:hover { background: #1976d2; color: #fff; text-decoration: none; }
   @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { gap: 18px; } .event-card { flex-direction: column; min-height: unset; } .event-image { flex-basis: 120px; } .event-image img { width: 100px; height: 100px; } .event-details { padding: 18px 12px; } }
     @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { flex-direction: column; gap: 18px; } .event-card { max-width: 100%; } }
@@ -71,10 +71,9 @@
           detailsHTML += `<div class="event-title">${event.title}</div>`;
           detailsHTML += `<div class="event-date"><b>Date:</b> ${event.date}</div>`;
           detailsHTML += `<div class="event-location"><b>Location:</b> ${event.location}</div>`;
+          detailsHTML += `<div class="event-description">${event.description}</div>`;
           if (event.link) {
             detailsHTML += `<a class="event-link" href="${event.link}" target="_blank">More Info</a>`;
-          } else {
-            detailsHTML += `<div class="event-description">${event.description}</div>`;
           }
           detailsHTML += `</div>`;
           card.innerHTML = imageHTML + detailsHTML;
