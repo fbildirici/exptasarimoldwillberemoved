@@ -237,10 +237,49 @@
     <div class="paperlist-main">
       <div class="paperlist-controls">
         <div class="paperlist-slider" style="position:relative;height:60px;">
-          <input type="range" id="year-range-min" min="0" max="0" value="0" step="1" style="width:100%;margin-top:24px;">
-          <input type="range" id="year-range-max" min="0" max="0" value="0" step="1" style="width:100%;margin-top:24px;position:absolute;left:0;top:0;pointer-events:none;opacity:0;">
+          <div class="mui-slider-bar" style="position:relative;height:32px;margin-bottom:8px;">
+            <div id="mui-slider-track" class="mui-slider-track"></div>
+            <button id="mui-slider-min" class="mui-slider-thumb" type="button" aria-label="Min year"></button>
+            <button id="mui-slider-max" class="mui-slider-thumb" type="button" aria-label="Max year"></button>
+          </div>
           <div class="slider-labels" id="year-slider-labels" style="margin-top:2px;"></div>
         </div>
+    .mui-slider-bar {
+      width: 100%;
+      height: 32px;
+      position: relative;
+      user-select: none;
+    }
+    .mui-slider-track {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      z-index: 1;
+    }
+    .mui-slider-thumb {
+      position: absolute;
+      top: 5px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #455a64;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.2s;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mui-slider-thumb:active, .mui-slider-thumb:focus {
+      background: #1976d2;
+    }
 
 
         <select id="sort-filter" class="paperlist-sort">
@@ -298,32 +337,70 @@
       });
 
     function renderYearSlider() {
-      const minSlider = document.getElementById('year-range-min');
-      const maxSlider = document.getElementById('year-range-max');
-      minSlider.min = 0;
-      minSlider.max = allYears.length-1;
-      minSlider.value = 0;
-      maxSlider.min = 0;
-      maxSlider.max = allYears.length-1;
-      maxSlider.value = allYears.length-1;
-      minSlider.oninput = function() {
-        if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
-          minSlider.value = maxSlider.value;
-        }
-        yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
+      const minBtn = document.getElementById('mui-slider-min');
+      const maxBtn = document.getElementById('mui-slider-max');
+      const track = document.getElementById('mui-slider-track');
+      let minIdx = 0;
+      let maxIdx = allYears.length-1;
+      function updateSlider() {
+        // Position thumbs
+        const bar = track.parentElement;
+        const barWidth = bar.offsetWidth;
+        const left = (minIdx/(allYears.length-1))*barWidth;
+        const right = (maxIdx/(allYears.length-1))*barWidth;
+        minBtn.style.left = `calc(${(minIdx/(allYears.length-1))*100}% - 14px)`;
+        maxBtn.style.left = `calc(${(maxIdx/(allYears.length-1))*100}% - 14px)`;
+        // Track highlight
+        track.style.background = `linear-gradient(90deg, #eee 0%, #1976d2 ${(minIdx/(allYears.length-1))*100}%, #1976d2 ${(maxIdx/(allYears.length-1))*100}%, #eee 100%)`;
+        yearRange = [allYears[minIdx], allYears[maxIdx]];
         renderYearLabels();
         renderPapers();
+      }
+      function getIdxFromEvent(e) {
+        const bar = track.parentElement;
+        const rect = bar.getBoundingClientRect();
+        let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        return Math.round((x/rect.width)*(allYears.length-1));
+      }
+      let dragging = null;
+      minBtn.onmousedown = minBtn.ontouchstart = function(e) {
+        dragging = 'min';
+        e.preventDefault();
       };
-      maxSlider.oninput = function() {
-        if (parseInt(maxSlider.value) < parseInt(minSlider.value)) {
-          maxSlider.value = minSlider.value;
+      maxBtn.onmousedown = maxBtn.ontouchstart = function(e) {
+        dragging = 'max';
+        e.preventDefault();
+      };
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('touchmove', onDrag);
+      document.addEventListener('mouseup', stopDrag);
+      document.addEventListener('touchend', stopDrag);
+      function onDrag(e) {
+        if (!dragging) return;
+        let idx = getIdxFromEvent(e);
+        if (dragging === 'min') {
+          minIdx = Math.min(idx, maxIdx);
+        } else if (dragging === 'max') {
+          maxIdx = Math.max(idx, minIdx);
         }
-        yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
-        renderYearLabels();
-        renderPapers();
+        updateSlider();
+      }
+      function stopDrag() { dragging = null; }
+      // Keyboard support
+      minBtn.onkeydown = function(e) {
+        if (e.key === 'ArrowRight' && minIdx < maxIdx) { minIdx++; updateSlider(); }
+        if (e.key === 'ArrowLeft' && minIdx > 0) { minIdx--; updateSlider(); }
       };
-      yearRange = [allYears[0], allYears[allYears.length-1]];
-      renderYearLabels();
+      maxBtn.onkeydown = function(e) {
+        if (e.key === 'ArrowLeft' && maxIdx > minIdx) { maxIdx--; updateSlider(); }
+        if (e.key === 'ArrowRight' && maxIdx < allYears.length-1) { maxIdx++; updateSlider(); }
+      };
+      // Init
+      minIdx = 0;
+      maxIdx = allYears.length-1;
+      updateSlider();
+      window.addEventListener('resize', updateSlider);
     }
     function renderYearLabels() {
       const labels = allYears.map((y, i) => {
