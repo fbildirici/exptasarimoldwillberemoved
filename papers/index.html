@@ -237,7 +237,8 @@
     <div class="paperlist-main">
       <div class="paperlist-controls">
         <div class="paperlist-slider">
-          <input type="range" id="year-range" min="0" max="0" value="0" step="1" style="width:100%">
+          <input type="range" id="year-range-min" min="0" max="0" value="0" step="1" style="width:49%">
+          <input type="range" id="year-range-max" min="0" max="0" value="0" step="1" style="width:49%;float:right;">
           <div class="slider-labels" id="year-slider-labels"></div>
         </div>
         <select id="sort-filter" class="paperlist-sort">
@@ -269,15 +270,22 @@
     const PRIOR_LABEL = "prior/related work";
     let papers = [];
     let selectedLabels = [];
-    let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
+  let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
     let allLabels = [];
     // Fetch and preprocess papers
     fetch('/_data/papers.json')
       .then(r => r.json())
       .then(data => {
-        // Remove any non-object entries (e.g. legacy HTML)
         papers = data.filter(p => typeof p === 'object' && p.title);
-        allYears = Array.from(new Set(papers.flatMap(p => p.year))).sort((a,b)=>a-b);
+        allYears = Array.from(new Set(papers.flatMap(p => {
+          let years = [];
+          if (Array.isArray(p.publications)) {
+            years = p.publications.map(pub => pub.year).filter(y => y != null);
+          } else if (p.year) {
+            years = [p.year];
+          }
+          return years;
+        }))).sort((a,b)=>a-b);
         yearMin = allYears[0] || 2000;
         yearMax = allYears[allYears.length-1] || 2025;
         yearRange = [yearMin, yearMax];
@@ -288,19 +296,41 @@
       });
 
     function renderYearSlider() {
-      const yearSlider = document.getElementById('year-range');
-      yearSlider.min = 0;
-      yearSlider.max = allYears.length-1;
-      yearSlider.value = allYears.length-1;
-      yearSlider.oninput = function() {
-        yearRange = [yearMin, allYears[this.value]];
+      const minSlider = document.getElementById('year-range-min');
+      const maxSlider = document.getElementById('year-range-max');
+      minSlider.min = 0;
+      minSlider.max = allYears.length-1;
+      minSlider.value = 0;
+      maxSlider.min = 0;
+      maxSlider.max = allYears.length-1;
+      maxSlider.value = allYears.length-1;
+      minSlider.oninput = function() {
+        if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
+          minSlider.value = maxSlider.value;
+        }
+        yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
         renderYearLabels();
         renderPapers();
       };
+      maxSlider.oninput = function() {
+        if (parseInt(maxSlider.value) < parseInt(minSlider.value)) {
+          maxSlider.value = minSlider.value;
+        }
+        yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
+        renderYearLabels();
+        renderPapers();
+      };
+      yearRange = [allYears[0], allYears[allYears.length-1]];
       renderYearLabels();
     }
     function renderYearLabels() {
-      const labels = allYears.map(y => "'"+String(y).slice(-2));
+      const labels = allYears.map((y, i) => {
+        if (i === 0 || i === allYears.length-1 || i % 2 === 0) {
+          return "'"+String(y).slice(-2);
+        } else {
+          return '';
+        }
+      });
       document.getElementById('year-slider-labels').innerHTML = labels.join(' ');
     }
     function renderFilters() {
@@ -341,19 +371,32 @@
     };
     function renderPapers() {
       const sort = document.getElementById('sort-filter').value;
-      const yearIdx = document.getElementById('year-range').value;
-      const yearTo = allYears[yearIdx] || yearMax;
+      const minIdx = parseInt(document.getElementById('year-range-min').value);
+      const maxIdx = parseInt(document.getElementById('year-range-max').value);
+      const yearFrom = allYears[minIdx] || yearMin;
+      const yearTo = allYears[maxIdx] || yearMax;
       let filtered = papers.filter(p => {
-        let match = true;
-        if (p.year < yearMin || p.year > yearTo) match = false;
-        if (selectedLabels.length > 0) {
-          if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
+        // Find all years for this paper (from publications)
+        let paperYears = [];
+        if (Array.isArray(p.publications)) {
+          paperYears = p.publications.map(pub => pub.year).filter(y => y != null);
+        } else if (p.year) {
+          paperYears = [p.year];
         }
-        return match;
+        // Paper is included if any of its years is in the selected range
+        let inRange = paperYears.some(y => y >= yearFrom && y <= yearTo);
+        if (!inRange) return false;
+        if (selectedLabels.length > 0) {
+          if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) return false;
+        }
+        return true;
       });
       filtered.sort((a, b) => {
-        if (sort === 'desc') return (b.year || 0) - (a.year || 0);
-        else return (a.year || 0) - (b.year || 0);
+        // Sort by the newest (or oldest) publication year
+        let aYear = Math.max(...(Array.isArray(a.publications) ? a.publications.map(pub => pub.year || 0) : [a.year || 0]));
+        let bYear = Math.max(...(Array.isArray(b.publications) ? b.publications.map(pub => pub.year || 0) : [b.year || 0]));
+        if (sort === 'desc') return bYear - aYear;
+        else return aYear - bYear;
       });
       document.getElementById('paper-count').textContent = `${filtered.length} papers`;
       const container = document.getElementById('papers-list');
@@ -368,7 +411,7 @@
             let name = pub.displayName || pub.name || '';
             let text = name + (pub.year ? ` '${String(pub.year).slice(-2)}` : '');
             let variant = (name === 'arXiv') ? 'outlined' : 'filled';
-            return `<span class='chip pub' variant='${variant}' onclick='window.open("${pub.url||'#'}","_blank")'>${text}</span>`;
+            return `<span class='chip pub' variant='${variant}' onclick='window.open(\"${pub.url||'#'}\",\"_blank\")'>${text}</span>`;
           }).join(' ');
         }
         // Label chips
@@ -382,15 +425,17 @@
           }).join(' ');
         }
         div.innerHTML = `
-          <div style="flex:1;min-width:0;">
-            <div class="paper-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</div>
-            <div class="paper-authors">${paper.authors || ''}</div>
-            <div class="paper-chips">${pubChips} ${labelChips}</div>
+          <div style=\"flex:1;min-width:0;\">
+            <div class=\"paper-title\">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</div>
+            <div class=\"paper-authors\">${paper.authors || ''}</div>
+            <div class=\"paper-chips\">${pubChips} ${labelChips}</div>
           </div>
         `;
         container.appendChild(div);
       });
-      document.getElementById('reset-filters').style.display = (selectedLabels.length || (document.getElementById('year-range').value != allYears.length-1)) ? '' : 'none';
+      // Show reset if any filter is active
+      const minDefault = 0, maxDefault = allYears.length-1;
+      document.getElementById('reset-filters').style.display = (selectedLabels.length || minIdx !== minDefault || maxIdx !== maxDefault) ? '' : 'none';
     }
   </script>
 </body>
