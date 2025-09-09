@@ -278,26 +278,31 @@
   .alps-slider__thumb--max { z-index: 3; }
   .alps-slider-labels {
     position: relative;
-    height: 18px;
-    margin-top: 38px;
-    margin-bottom: 0;
+    display: block;
     width: 100%;
+    height: 22px;
+    margin-top: 32px;
+    margin-bottom: 0;
     font-size: 13px;
     color: #555;
     pointer-events: none;
     user-select: none;
-    display: block;
+    z-index: 10;
   }
   .alps-slider-labels .alps-slider-label {
     position: absolute;
     top: 0;
-    left: 0;
     transform: translateX(-50%);
-    white-space: nowrap;
-    min-width: 18px;
+    background: #fff;
+    padding: 0 4px;
+    border-radius: 4px;
+    min-width: 22px;
     text-align: center;
     pointer-events: none;
     user-select: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
   }
   @media (max-width: 400px) {
     .alps-slider { max-width: 100%; }
@@ -364,7 +369,7 @@
       const labelsCont = document.getElementById('year-slider-labels');
       if (!labelsCont) return;
       labelsCont.innerHTML = '';
-      const minGap = 28; // px
+      const minGap = 32; // px
       const n = years.length <= 7 ? years.length : Math.max(6, Math.min(10, years.length));
       let idxs = [];
       for (let i = 0; i < n; ++i) idxs.push(Math.round(i*(years.length-1)/(n-1)));
