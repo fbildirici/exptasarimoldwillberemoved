@@ -302,7 +302,13 @@
       .then(r => r.json())
       .then(data => {
         papers = data.filter(p => typeof p === 'object' && p.title);
-        allYears = Array.from(new Set(papers.flatMap(p => p.year))).sort((a,b)=>a-b);
+        // Extract all years from publications and paper.year
+        allYears = Array.from(new Set(papers.flatMap(p => {
+          let years = [];
+          if (Array.isArray(p.publications)) years.push(...p.publications.map(pub => pub.year).filter(Boolean));
+          if (p.year) years.push(p.year);
+          return years;
+        }))).filter(Boolean).sort((a,b)=>a-b);
         yearMin = allYears[0] || 2000;
         yearMax = allYears[allYears.length-1] || 2025;
         yearRange = [yearMin, yearMax];
@@ -314,9 +320,11 @@
           initial: [0, allYears.length-1],
           onChange: ({minIndex, maxIndex, minYear, maxYear}) => {
             yearRange = [minYear, maxYear];
+            renderYearLabels();
             renderPapers();
           }
         });
+        renderYearLabels();
         renderFilters();
         renderPapers();
       });
@@ -375,16 +383,30 @@
     function renderPapers() {
       const sort = document.getElementById('sort-filter').value;
       let filtered = papers.filter(p => {
+        // Find all years for this paper
+        let years = [];
+        if (Array.isArray(p.publications)) years.push(...p.publications.map(pub => pub.year).filter(Boolean));
+        if (p.year) years.push(p.year);
+        let minYear = Math.min(...years);
+        let maxYear = Math.max(...years);
         let match = true;
-        if (p.year < yearRange[0] || p.year > yearRange[1]) match = false;
+        if (minYear > yearRange[1] || maxYear < yearRange[0]) match = false;
         if (selectedLabels.length > 0) {
           if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
         }
         return match;
       });
       filtered.sort((a, b) => {
-        if (sort === 'desc') return (b.year || 0) - (a.year || 0);
-        else return (a.year || 0) - (b.year || 0);
+        // Sort by max year in publications or paper.year
+        let ay = [];
+        if (Array.isArray(a.publications)) ay.push(...a.publications.map(pub => pub.year).filter(Boolean));
+        if (a.year) ay.push(a.year);
+        let by = [];
+        if (Array.isArray(b.publications)) by.push(...b.publications.map(pub => pub.year).filter(Boolean));
+        if (b.year) by.push(b.year);
+        let aYear = sort === 'desc' ? Math.max(...ay) : Math.min(...ay);
+        let bYear = sort === 'desc' ? Math.max(...by) : Math.min(...by);
+        return sort === 'desc' ? (bYear - aYear) : (aYear - bYear);
       });
       document.getElementById('paper-count').textContent = `${filtered.length} papers`;
       const container = document.getElementById('papers-list');
@@ -586,7 +608,6 @@
         setIndices: ([a, b]) => { minIdx = Math.max(0, Math.min(a, b)); maxIdx = Math.min(years.length-1, Math.max(a, b)); updateUI(); fireChange(); }
       };
     }
-  </script>
   </script>
 </body>
 </html>
