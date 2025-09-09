@@ -353,14 +353,18 @@
     function renderYearLabels() {
       const labelsCont = document.getElementById('year-slider-labels');
       if (!labelsCont) return;
+      // Use short year marks as in MUI: e.g., '23
       let n = allYears.length <= 7 ? allYears.length : Math.max(6, Math.min(10, allYears.length));
       let idxs = [];
       for (let i = 0; i < n; ++i) {
-        idxs.push(Math.round(i*(allYears.length-1)/(n-1)));
+        idxs.push(Math.round(i * (allYears.length - 1) / (n - 1)));
       }
+      // Calculate percent positions for each label (MUI-like)
       let html = '<div class="alps-slider-labels">';
       for (let i = 0; i < idxs.length; ++i) {
-        html += `<span>${allYears[idxs[i]]}</span>`;
+        const idx = idxs[i];
+        const percent = (idx / (allYears.length - 1)) * 100;
+        html += `<span class="alps-slider-label" style="left:${percent}%;transform:translateX(-50%);">'${String(allYears[idx]).slice(-2)}</span>`;
       }
       html += '</div>';
       labelsCont.innerHTML = html;
@@ -424,21 +428,7 @@
         inputMin.min = 0; inputMin.max = years.length-1; inputMin.step = 1; inputMin.value = initial[0];
         inputMax.min = 0; inputMax.max = years.length-1; inputMax.step = 1; inputMax.value = initial[1];
         let minIdx = initial[0], maxIdx = initial[1];
-        function renderLabels() {
-          const labelsCont = document.getElementById('year-slider-labels');
-          if (!labelsCont) return;
-          let n = years.length <= 7 ? years.length : Math.max(6, Math.min(10, years.length));
-          let idxs = [];
-          for (let i = 0; i < n; ++i) idxs.push(Math.round(i*(years.length-1)/(n-1)));
-          if (container.offsetWidth < 260 && n > 7) idxs = idxs.filter((v,i)=>i%2===0);
-          let html = '';
-          for (let i = 0; i < idxs.length; ++i) {
-            const idx = idxs[i];
-            const percent = (idx/(years.length-1))*100;
-            html += `<span style="left:${percent}%">'${String(years[idx]).slice(-2)}</span>`;
-          }
-          labelsCont.innerHTML = `<div class="alps-slider-labels">${html}</div>`;
-        }
+    // Remove duplicate/unused renderLabels in slider, use renderYearLabels only
         function percent(idx) { return (idx/(years.length-1))*100; }
         function updateUI() {
           minIdx = Math.max(0, Math.min(minIdx, maxIdx));
@@ -457,7 +447,8 @@
           thumbMax.setAttribute('aria-valuemax', years.length-1);
           thumbMax.setAttribute('aria-valuenow', maxIdx);
           thumbMax.setAttribute('aria-valuetext', years[maxIdx]);
-          renderLabels();
+          // Call global renderYearLabels to update marks
+          if (typeof renderYearLabels === 'function') renderYearLabels();
         }
         function fireChange() {
           if (typeof onChange === 'function') {
@@ -514,9 +505,9 @@
         thumbMin.addEventListener('keydown', e => handleKey(e, 'min'));
         thumbMax.addEventListener('keydown', e => handleKey(e, 'max'));
       window.addEventListener('resize', updateUI);
-      window.addEventListener('resize', renderLabels);
+  window.addEventListener('resize', renderYearLabels);
       updateUI();
-      renderLabels();
+  renderYearLabels();
         return {
           getIndices: () => [minIdx, maxIdx],
           setIndices: ([a, b]) => { minIdx = Math.max(0, Math.min(a, b)); maxIdx = Math.min(years.length-1, Math.max(a, b)); updateUI(); fireChange(); }
