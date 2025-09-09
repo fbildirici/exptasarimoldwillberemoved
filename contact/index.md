@@ -1,4 +1,8 @@
-
+---
+layout: page
+title: Contact
+permalink: /contact/
+---
 <div align="center">
 	<img src="https://img.icons8.com/ios-filled/100/4a90e2/secured-letter.png" width="80" alt="Contact Icon"/>
 </div>
