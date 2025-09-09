@@ -230,23 +230,14 @@
 <body>
   <div class="alps-header">
     <div class="alps-header-bar">
-  <a class="alps-title" href="http://expopt.org" style="color:inherit;text-decoration:none;">ExpOpt</a>
+      <a class="alps-title" href="http://expopt.org" style="color:inherit;text-decoration:none;">Home</a>
     </div>
   </div>
   <div class="paperlist-container">
     <div class="paperlist-main">
       <div class="paperlist-controls">
-        <div class="paperlist-slider" style="position:relative;height:60px;">
-          <div class="mui-slider-bar" style="position:relative;height:32px;margin-bottom:8px;">
-            <div id="mui-slider-track" class="mui-slider-track"></div>
-            <button id="mui-slider-min" class="mui-slider-thumb" type="button" aria-label="Min year"></button>
-            <button id="mui-slider-max" class="mui-slider-thumb" type="button" aria-label="Max year"></button>
-          </div>
-          <div class="slider-labels" id="year-slider-labels" style="margin-top:2px;"></div>
-        </div>
-
-
-
+  <div class="paperlist-slider"></div>
+  <div class="slider-labels" id="year-slider-labels"></div>
         <select id="sort-filter" class="paperlist-sort">
           <option value="desc">Newest first</option>
           <option value="asc">Oldest first</option>
@@ -261,6 +252,33 @@
       <div class="sidebar-chips" id="chip-filters"></div>
     </div>
   </div>
+  <style>
+    .alps-slider { position: relative; width: 100%; max-width: 360px; margin: 0 auto; height: 48px; user-select: none; }
+    .alps-slider-track {
+      position: absolute; left: 0; right: 0; top: 22px; height: 6px; background: #e0e0e0; border-radius: 3px; z-index: 1;
+    }
+    .alps-slider-fill {
+      position: absolute; top: 22px; height: 6px; background: #1976d2; border-radius: 3px; z-index: 2;
+    }
+    .alps-slider-thumb {
+      position: absolute; top: 10px; width: 28px; height: 28px; border-radius: 50%; background: #455a64; border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; z-index: 3; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .alps-slider-thumb:active, .alps-slider-thumb:focus { background: #1976d2; outline: 2px solid #1976d2; }
+    .alps-slider input[type=range] {
+      position: absolute; top: 0; left: 0; width: 100%; height: 48px; opacity: 0; pointer-events: none;
+    }
+    .alps-slider-labels {
+      display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 38px; margin-bottom: 0; width: 100%;
+      pointer-events: none; user-select: none;
+    }
+    @media (max-width: 360px) {
+      .alps-slider { max-width: 100%; }
+      .alps-slider-labels { font-size: 12px; }
+      .alps-slider-thumb { width: 24px; height: 24px; }
+    }
+  </style>
   <script>
     // --- PaperList logic ---
     const TYPE_LABELS = [
@@ -276,41 +294,47 @@
     const PRIOR_LABEL = "prior/related work";
     let papers = [];
     let selectedLabels = [];
-  let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
+    let yearMin = 0, yearMax = 0, yearRange = [0,0], allYears = [];
     let allLabels = [];
+    let yearSliderApi = null;
     // Fetch and preprocess papers
     fetch('/_data/papers.json')
       .then(r => r.json())
       .then(data => {
         papers = data.filter(p => typeof p === 'object' && p.title);
-        allYears = Array.from(new Set(papers.flatMap(p => {
-          let years = [];
-          if (Array.isArray(p.publications)) {
-            years = p.publications.map(pub => pub.year).filter(y => y != null);
-          } else if (p.year) {
-            years = [p.year];
-          }
-          return years;
-        }))).sort((a,b)=>a-b);
+        allYears = Array.from(new Set(papers.flatMap(p => p.year))).sort((a,b)=>a-b);
         yearMin = allYears[0] || 2000;
         yearMax = allYears[allYears.length-1] || 2025;
         yearRange = [yearMin, yearMax];
         allLabels = Array.from(new Set(papers.flatMap(p => Array.isArray(p.labels) ? p.labels : [])));
-        renderYearSlider();
+        // Init new slider
+        yearSliderApi = initYearSlider({
+          container: document.querySelector('.paperlist-slider'),
+          years: allYears,
+          initial: [0, allYears.length-1],
+          onChange: ({minIndex, maxIndex, minYear, maxYear}) => {
+            yearRange = [minYear, maxYear];
+            renderPapers();
+          }
+        });
         renderFilters();
         renderPapers();
       });
 
-  // ...existing code for renderYearSlider() and slider logic...
     function renderYearLabels() {
-      const labels = allYears.map((y, i) => {
-        if (i === 0 || i === allYears.length-1 || i % 2 === 0) {
-          return "'"+String(y).slice(-2);
-        } else {
-          return '';
-        }
-      });
-      document.getElementById('year-slider-labels').innerHTML = labels.join(' ');
+      const labelsCont = document.getElementById('year-slider-labels');
+      if (!labelsCont) return;
+      let n = allYears.length <= 7 ? allYears.length : Math.max(6, Math.min(10, allYears.length));
+      let idxs = [];
+      for (let i = 0; i < n; ++i) {
+        idxs.push(Math.round(i*(allYears.length-1)/(n-1)));
+      }
+      let html = '<div class="alps-slider-labels">';
+      for (let i = 0; i < idxs.length; ++i) {
+        html += `<span>${allYears[idxs[i]]}</span>`;
+      }
+      html += '</div>';
+      labelsCont.innerHTML = html;
     }
     function renderFilters() {
       let chipFilters = document.getElementById('chip-filters');
@@ -339,7 +363,7 @@
     }
     document.getElementById('reset-filters').onclick = function() {
       selectedLabels = [];
-      document.getElementById('year-range').value = allYears.length-1;
+      if (yearSliderApi) yearSliderApi.setIndices([0, allYears.length-1]);
       yearRange = [yearMin, yearMax];
       document.getElementById('sort-filter').value = 'desc';
       renderFilters();
@@ -350,32 +374,17 @@
     };
     function renderPapers() {
       const sort = document.getElementById('sort-filter').value;
-      const minIdx = parseInt(document.getElementById('year-range-min').value);
-      const maxIdx = parseInt(document.getElementById('year-range-max').value);
-      const yearFrom = allYears[minIdx] || yearMin;
-      const yearTo = allYears[maxIdx] || yearMax;
       let filtered = papers.filter(p => {
-        // Find all years for this paper (from publications)
-        let paperYears = [];
-        if (Array.isArray(p.publications)) {
-          paperYears = p.publications.map(pub => pub.year).filter(y => y != null);
-        } else if (p.year) {
-          paperYears = [p.year];
-        }
-        // Paper is included if any of its years is in the selected range
-        let inRange = paperYears.some(y => y >= yearFrom && y <= yearTo);
-        if (!inRange) return false;
+        let match = true;
+        if (p.year < yearRange[0] || p.year > yearRange[1]) match = false;
         if (selectedLabels.length > 0) {
-          if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) return false;
+          if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
         }
-        return true;
+        return match;
       });
       filtered.sort((a, b) => {
-        // Sort by the newest (or oldest) publication year
-        let aYear = Math.max(...(Array.isArray(a.publications) ? a.publications.map(pub => pub.year || 0) : [a.year || 0]));
-        let bYear = Math.max(...(Array.isArray(b.publications) ? b.publications.map(pub => pub.year || 0) : [b.year || 0]));
-        if (sort === 'desc') return bYear - aYear;
-        else return aYear - bYear;
+        if (sort === 'desc') return (b.year || 0) - (a.year || 0);
+        else return (a.year || 0) - (b.year || 0);
       });
       document.getElementById('paper-count').textContent = `${filtered.length} papers`;
       const container = document.getElementById('papers-list');
@@ -390,7 +399,7 @@
             let name = pub.displayName || pub.name || '';
             let text = name + (pub.year ? ` '${String(pub.year).slice(-2)}` : '');
             let variant = (name === 'arXiv') ? 'outlined' : 'filled';
-            return `<span class='chip pub' variant='${variant}' onclick='window.open(\"${pub.url||'#'}\",\"_blank\")'>${text}</span>`;
+            return `<span class='chip pub' variant='${variant}' onclick='window.open("${pub.url||'#'}","_blank")'>${text}</span>`;
           }).join(' ');
         }
         // Label chips
@@ -404,18 +413,180 @@
           }).join(' ');
         }
         div.innerHTML = `
-          <div style=\"flex:1;min-width:0;\">
-            <div class=\"paper-title\">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</div>
-            <div class=\"paper-authors\">${paper.authors || ''}</div>
-            <div class=\"paper-chips\">${pubChips} ${labelChips}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="paper-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</div>
+            <div class="paper-authors">${paper.authors || ''}</div>
+            <div class="paper-chips">${pubChips} ${labelChips}</div>
           </div>
         `;
         container.appendChild(div);
       });
-      // Show reset if any filter is active
-      const minDefault = 0, maxDefault = allYears.length-1;
-      document.getElementById('reset-filters').style.display = (selectedLabels.length || minIdx !== minDefault || maxIdx !== maxDefault) ? '' : 'none';
+      document.getElementById('reset-filters').style.display = (selectedLabels.length || (yearRange[0] !== yearMin || yearRange[1] !== yearMax)) ? '' : 'none';
     }
+
+    // --- Accessible, responsive, dual-thumb year slider ---
+    function initYearSlider({ container, years, initial, onChange }) {
+      container.innerHTML = '';
+      const slider = document.createElement('div');
+      slider.className = 'alps-slider';
+      const track = document.createElement('div');
+      track.className = 'alps-slider-track';
+      slider.appendChild(track);
+      const fill = document.createElement('div');
+      fill.className = 'alps-slider-fill';
+      slider.appendChild(fill);
+      const thumbMin = document.createElement('div');
+      thumbMin.className = 'alps-slider-thumb';
+      thumbMin.tabIndex = 0;
+      thumbMin.id = 'year-range-min';
+      thumbMin.setAttribute('role', 'slider');
+      thumbMin.setAttribute('aria-label', 'Minimum year');
+      slider.appendChild(thumbMin);
+      const thumbMax = document.createElement('div');
+      thumbMax.className = 'alps-slider-thumb';
+      thumbMax.tabIndex = 0;
+      thumbMax.id = 'year-range-max';
+      thumbMax.setAttribute('role', 'slider');
+      thumbMax.setAttribute('aria-label', 'Maximum year');
+      slider.appendChild(thumbMax);
+      // Hidden range inputs for accessibility
+      const inputMin = document.createElement('input');
+      inputMin.type = 'range';
+      inputMin.min = 0; inputMin.max = years.length-1; inputMin.step = 1;
+      inputMin.value = initial[0];
+      inputMin.id = 'year-range-min';
+      slider.appendChild(inputMin);
+      const inputMax = document.createElement('input');
+      inputMax.type = 'range';
+      inputMax.min = 0; inputMax.max = years.length-1; inputMax.step = 1;
+      inputMax.value = initial[1];
+      inputMax.id = 'year-range-max';
+      slider.appendChild(inputMax);
+      container.appendChild(slider);
+      // Labels
+      const labelsCont = document.getElementById('year-slider-labels');
+      function renderLabels() {
+        if (!labelsCont) return;
+        let n = years.length <= 7 ? years.length : Math.max(6, Math.min(10, years.length));
+        let idxs = [];
+        for (let i = 0; i < n; ++i) {
+          idxs.push(Math.round(i*(years.length-1)/(n-1)));
+        }
+        let html = '<div class="alps-slider-labels">';
+        for (let i = 0; i < idxs.length; ++i) {
+          html += `<span>${years[idxs[i]]}</span>`;
+        }
+        html += '</div>';
+        labelsCont.innerHTML = html;
+      }
+      renderLabels();
+      // State
+      let minIdx = initial[0], maxIdx = initial[1];
+      function clampIdxs() {
+        minIdx = Math.max(0, Math.min(minIdx, maxIdx));
+        maxIdx = Math.min(years.length-1, Math.max(maxIdx, minIdx));
+      }
+      function percent(idx) { return (idx/(years.length-1))*100; }
+      function updateUI() {
+        clampIdxs();
+        thumbMin.style.left = `calc(${percent(minIdx)}% - 14px)`;
+        thumbMax.style.left = `calc(${percent(maxIdx)}% - 14px)`;
+        fill.style.left = percent(minIdx) + '%';
+        fill.style.width = (percent(maxIdx)-percent(minIdx)) + '%';
+        // ARIA
+        thumbMin.setAttribute('aria-valuemin', 0);
+        thumbMin.setAttribute('aria-valuemax', years.length-1);
+        thumbMin.setAttribute('aria-valuenow', minIdx);
+        thumbMin.setAttribute('aria-valuetext', years[minIdx]);
+        thumbMax.setAttribute('aria-valuemin', 0);
+        thumbMax.setAttribute('aria-valuemax', years.length-1);
+        thumbMax.setAttribute('aria-valuenow', maxIdx);
+        thumbMax.setAttribute('aria-valuetext', years[maxIdx]);
+        inputMin.value = minIdx;
+        inputMax.value = maxIdx;
+      }
+      function fireChange() {
+        if (typeof onChange === 'function') {
+          onChange({ minIndex: minIdx, maxIndex: maxIdx, minYear: years[minIdx], maxYear: years[maxIdx] });
+        }
+      }
+      // Drag logic
+      let dragging = null;
+      function onPointerDown(e, which) {
+        dragging = which;
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      }
+      function onPointerMove(e) {
+        if (!dragging) return;
+        let rect = track.getBoundingClientRect();
+        let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        let idx = Math.round((x/rect.width)*(years.length-1));
+        if (dragging === 'min') {
+          minIdx = Math.min(idx, maxIdx);
+        } else {
+          maxIdx = Math.max(idx, minIdx);
+        }
+        updateUI();
+        fireChange();
+      }
+      function onPointerUp() {
+        dragging = null;
+        document.body.style.userSelect = '';
+      }
+      thumbMin.addEventListener('mousedown', e => onPointerDown(e, 'min'));
+      thumbMax.addEventListener('mousedown', e => onPointerDown(e, 'max'));
+      thumbMin.addEventListener('touchstart', e => onPointerDown(e, 'min'), {passive:false});
+      thumbMax.addEventListener('touchstart', e => onPointerDown(e, 'max'), {passive:false});
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('touchmove', onPointerMove, {passive:false});
+      window.addEventListener('mouseup', onPointerUp);
+      window.addEventListener('touchend', onPointerUp);
+      // Range input (for accessibility)
+      inputMin.addEventListener('input', e => {
+        minIdx = Math.min(Number(inputMin.value), maxIdx);
+        updateUI();
+        fireChange();
+      });
+      inputMax.addEventListener('input', e => {
+        maxIdx = Math.max(Number(inputMax.value), minIdx);
+        updateUI();
+        fireChange();
+      });
+      // Keyboard
+      function handleKey(e, which) {
+        let idx = which === 'min' ? minIdx : maxIdx;
+        let min = 0, max = years.length-1;
+        let step = 1;
+        switch (e.key) {
+          case 'ArrowLeft': idx = Math.max(min, idx-1); break;
+          case 'ArrowRight': idx = Math.min(max, idx+1); break;
+          case 'PageUp': idx = Math.min(max, idx+5); break;
+          case 'PageDown': idx = Math.max(min, idx-5); break;
+          case 'Home': idx = min; break;
+          case 'End': idx = max; break;
+          default: return;
+        }
+        if (which === 'min') minIdx = Math.min(idx, maxIdx);
+        else maxIdx = Math.max(idx, minIdx);
+        updateUI();
+        fireChange();
+        e.preventDefault();
+      }
+      thumbMin.addEventListener('keydown', e => handleKey(e, 'min'));
+      thumbMax.addEventListener('keydown', e => handleKey(e, 'max'));
+      // Resize
+      window.addEventListener('resize', updateUI);
+      // Initial
+      updateUI();
+      // API
+      return {
+        getIndices: () => [minIdx, maxIdx],
+        setIndices: ([a, b]) => { minIdx = Math.max(0, Math.min(a, b)); maxIdx = Math.min(years.length-1, Math.max(a, b)); updateUI(); fireChange(); }
+      };
+    }
+  </script>
   </script>
 </body>
 </html>
