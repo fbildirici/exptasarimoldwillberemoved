@@ -4,36 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; }
     .contact-md-container { max-width: 600px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
-    .contact-md-header { font-size: 2rem; font-weight: bold; color: #1976d2; margin-bottom: 10px; }
-    .contact-md-lead { color: #333; font-size: 1.13em; margin-bottom: 18px; }
-    .contact-md-list { list-style: none; padding: 0; margin: 0 0 18px 0; }
-    .contact-md-list li { margin-bottom: 10px; font-size: 1.08em; }
-    .contact-md-list b { color: #1976d2; }
+    .contact-md-container h1, .contact-md-container h2, .contact-md-container h3 { color: #1976d2; }
+    .contact-md-container ul { margin-left: 1.2em; }
+    .contact-md-container li { margin-bottom: 8px; font-size: 1.08em; }
+    .contact-md-container b, .contact-md-container strong { color: #1976d2; }
+    .contact-md-container a { color: #1976d2; text-decoration: none; }
+    .contact-md-container a:hover { text-decoration: underline; }
+    .contact-md-container pre { background:#f3f7fa; border-radius:6px; padding:14px 12px; font-size:1em; color:#222; }
+    .contact-md-container hr { margin:24px 0; border:none; border-top:1.5px solid #e0e0e0; }
     .contact-md-footer { text-align: center; color: #1976d2; font-weight: bold; margin-top: 32px; }
     @media (max-width: 700px) { .contact-md-container { padding: 18px 4vw; } }
   </style>
 </head>
 <body>
-  <div class="contact-md-container">
-    <div class="contact-md-header">Contact</div>
-    <div class="contact-md-lead">You can reach me via the following channels:</div>
-    <ul class="contact-md-list">
-      <li><b>Email:</b> your@email.com</li>
-      <li><b>LinkedIn:</b> <a href="https://linkedin.com/in/yourprofile" target="_blank">linkedin.com/in/yourprofile</a></li>
-      <li><b>Twitter:</b> <a href="https://twitter.com/yourhandle" target="_blank">@yourhandle</a></li>
-    </ul>
-    <hr style="margin:24px 0; border:none; border-top:1.5px solid #e0e0e0;"/>
-    <div style="font-size:1.08em; color:#444; margin-bottom:10px;">Or just send an email with the following template:</div>
-    <pre style="background:#f3f7fa; border-radius:6px; padding:14px 12px; font-size:1em; color:#222;">
+  <div class="contact-md-container" id="contact-md"></div>
+  <script type="text/markdown" id="contact-md-src">
+# Contact
+
+You can reach me via the following channels:
+
+- **Email:** your@email.com
+- **LinkedIn:** [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
+- **Twitter:** [@yourhandle](https://twitter.com/yourhandle)
+
+---
+
+Or just send an email with the following template:
+
+```
 Name: 
 Email: 
 Subject: 
 Message:
-    </pre>
-    <div class="contact-md-footer">Looking forward to hearing from you!</div>
-  </div>
+```
+
+---
+
+**Looking forward to hearing from you!**
+  </script>
+  <script>
+    // Render markdown to HTML
+    const md = document.getElementById('contact-md-src').textContent;
+    document.getElementById('contact-md').innerHTML = marked.parse(md);
+  </script>
 </body>
 </html>
