@@ -277,8 +277,23 @@
   .alps-slider__thumb--min { z-index: 3; }
   .alps-slider__thumb--max { z-index: 3; }
   .alps-slider-labels {
-    display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-top: 38px; margin-bottom: 0; width: 100%;
-    pointer-events: none; user-select: none;
+    position: relative;
+    height: 18px;
+    margin-top: 38px;
+    margin-bottom: 0;
+    width: 100%;
+    font-size: 13px;
+    color: #555;
+    pointer-events: none;
+    user-select: none;
+  }
+  .alps-slider-labels span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    min-width: 18px;
+    text-align: center;
   }
   @media (max-width: 400px) {
     .alps-slider { max-width: 100%; }
@@ -400,10 +415,13 @@
           let idxs = [];
           for (let i = 0; i < n; ++i) idxs.push(Math.round(i*(years.length-1)/(n-1)));
           if (container.offsetWidth < 260 && n > 7) idxs = idxs.filter((v,i)=>i%2===0);
-          let html = '<div class="alps-slider-labels">';
-          for (let i = 0; i < idxs.length; ++i) html += `<span>'${String(years[idxs[i]]).slice(-2)}</span>`;
-          html += '</div>';
-          labelsCont.innerHTML = html;
+          let html = '';
+          for (let i = 0; i < idxs.length; ++i) {
+            const idx = idxs[i];
+            const percent = (idx/(years.length-1))*100;
+            html += `<span style="left:${percent}%">'${String(years[idx]).slice(-2)}</span>`;
+          }
+          labelsCont.innerHTML = `<div class="alps-slider-labels">${html}</div>`;
         }
         function percent(idx) { return (idx/(years.length-1))*100; }
         function updateUI() {
@@ -546,8 +564,44 @@
           (selectedLabels.length || selectedYearRange[0] !== years[0] || selectedYearRange[1] !== years[years.length-1] || sortOrder !== 'desc')
           ? '' : 'none';
       }
+      // --- Label Filter Logic ---
+      const TYPE_LABELS = [
+        "dynamic / data structure",
+        "online",
+        "running time",
+        "approximation",
+        "streaming",
+        "game theory / mechanism design",
+        "differential privacy",
+        "survey"
+      ];
+      const PRIOR_LABEL = "prior/related work";
       function renderFilters() {
-        // ...mevcut chip kodun...
+        let chipFilters = document.getElementById('chip-filters');
+        chipFilters.innerHTML = '';
+        // Show type labels first, then prior, then others
+        TYPE_LABELS.concat([PRIOR_LABEL]).forEach(label => { chipFilters.appendChild(labelChip(label)); });
+        // Find all unique labels in papers
+        let allLabels = Array.from(new Set(papers.flatMap(p => Array.isArray(p.labels) ? p.labels : [])));
+        allLabels.filter(l => !TYPE_LABELS.includes(l) && l !== PRIOR_LABEL).sort().forEach(label => { chipFilters.appendChild(labelChip(label)); });
+      }
+      function labelChip(label) {
+        const span = document.createElement('span');
+        span.className = 'chip';
+        if (TYPE_LABELS.includes(label)) span.classList.add('type');
+        if (label === PRIOR_LABEL) span.classList.add('prior');
+        if (selectedLabels.includes(label)) span.classList.add('selected');
+        span.textContent = label;
+        span.onclick = () => {
+          if (selectedLabels.includes(label)) {
+            selectedLabels = selectedLabels.filter(l => l !== label);
+          } else {
+            selectedLabels = [label, ...selectedLabels];
+          }
+          renderFilters();
+          renderPapers();
+        };
+        return span;
       }
       fetch('/_data/papers.json')
         .then(r => r.json())
