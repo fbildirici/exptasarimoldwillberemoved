@@ -1,18 +1,47 @@
-<h1>Papers</h1>
-<ul>
-  {% for paper in site.data.papers %}
-    <li>
-      <strong>{{ paper.title }}</strong><br>
-      <em>{{ paper.authors }}</em>
-      {% if paper.journal %} | {{ paper.journal }}{% endif %}
-      {% if paper.year %} | {{ paper.year }}{% endif %}<br>
-      {% if paper.abstract %}
-        <span>{{ paper.abstract }}</span><br>
-      {% endif %}
-      {% if paper.url %}
-        <a href="{{ paper.url }}" target="_blank">Read more</a>
-      {% endif %}
-    </li>
-    <hr>
-  {% endfor %}
-</ul>
+---
+layout: default
+title: Papers
+permalink: /papers/
+---
+
+<section class="background" data-size="page">
+  <h1 id="papers">
+    <i class="icon fa-solid fa-scroll"></i>Papers
+  </h1>
+  <p>Our published papers on explainable optimization.</p>
+</section>
+
+<section class="background" data-size="page">
+  <h2 id="all">All Papers</h2>
+  <div class="citation-container">
+    {% for paper in site.data.papers %}
+      <div class="citation">
+        {% if paper.url %}
+          <a href="{{ paper.url }}" class="citation-title" target="_blank">
+            {{ paper.title }}
+          </a>
+        {% else %}
+          <span class="citation-title">{{ paper.title }}</span>
+        {% endif %}
+        <div class="citation-authors">
+          {{ paper.authors }}
+        </div>
+        <div class="citation-details">
+          {% if paper.journal %}
+            <span class="citation-publisher">{{ paper.journal }}</span>
+            &nbsp;·&nbsp;
+          {% endif %}
+          {% if paper.year %}
+            <span class="citation-date">{{ paper.year }}</span>
+          {% endif %}
+        </div>
+        {% if paper.abstract %}
+          <div class="citation-description">
+            {{ paper.abstract }}
+          </div>
+        {% endif %}
+      </div>
+      <hr>
+    {% endfor %}
+  </div>
+</section>
