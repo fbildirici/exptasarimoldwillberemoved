@@ -85,129 +85,288 @@ permalink: /papers/
     <button data-tooltip="Clear search" aria-label="clear search" onclick="clearSearch()">
       <i class="icon fa-solid fa-magnifying-glass"></i>
     </button>
-  </div>
-  <div class="search-info" id="search-info"></div>
-  <div class="filter-box" style="display:flex;gap:1em;align-items:center;flex-wrap:wrap;margin-bottom:1em;">
-    <label for="year-filter">Year:</label>
-    <select id="year-filter" onchange="renderPapers()">
-      <option value="">All</option>
-    </select>
-    <label for="journal-filter">Journal:</label>
-    <select id="journal-filter" onchange="renderPapers()">
-      <option value="">All</option>
-    </select>
-    <span id="tag-filters" class="tags"></span>
-    <button id="reset-filters" class="button" style="margin-left:auto;display:none;" onclick="resetFilters()">Reset</button>
-  </div>
-  <div class="citation-container" id="papers-list"></div>
-</section>
-<script>
-let papers = [];
-let selectedTags = [];
-fetch('/_data/papers.json')
-  .then(r => r.json())
-  .then(data => {
-    papers = data.filter(p => typeof p === 'object' && p.title);
-    populateFilters();
-    renderPapers();
-  });
 
-function populateFilters() {
-  const yearSet = new Set();
-  const journalSet = new Set();
-  const tagSet = new Set();
-  papers.forEach(p => {
-    if (p.year) yearSet.add(p.year);
-    if (p.journal) journalSet.add(p.journal);
-    if (Array.isArray(p.labels)) p.labels.forEach(l=>tagSet.add(l));
-  });
-  const yearFilter = document.getElementById('year-filter');
-  yearFilter.innerHTML = '<option value="">All</option>';
-  Array.from(yearSet).sort((a,b)=>b-a).forEach(y => {
-    const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y;
-    yearFilter.appendChild(opt);
-  });
-  const journalFilter = document.getElementById('journal-filter');
-  journalFilter.innerHTML = '<option value="">All</option>';
-  Array.from(journalSet).sort().forEach(j => {
-    const opt = document.createElement('option');
-    opt.value = j; opt.textContent = j;
-    journalFilter.appendChild(opt);
-  });
-  // Tag chips
-  const tagFilters = document.getElementById('tag-filters');
-  tagFilters.innerHTML = '';
-  Array.from(tagSet).sort().forEach(tag => {
-    const chip = document.createElement('span');
-    chip.className = 'tag' + (selectedTags.includes(tag) ? ' active' : '');
-    chip.textContent = tag;
-    chip.onclick = () => toggleTag(tag);
-    if (selectedTags.includes(tag)) chip.setAttribute('data-active','1');
-    tagFilters.appendChild(chip);
-  });
-}
-
-function toggleTag(tag) {
-  if (selectedTags.includes(tag)) {
-    selectedTags = selectedTags.filter(t => t !== tag);
-  } else {
-    selectedTags.push(tag);
+  <link rel="stylesheet" href="/_styles/citation.css">
+  <link rel="stylesheet" href="/_styles/search-box.css">
+  <link rel="stylesheet" href="/_styles/search-info.css">
+  <link rel="stylesheet" href="/_styles/tags.css">
+  <link rel="stylesheet" href="/_styles/button.css">
+  <style>
+  body { background: #f7fafd; }
+  .paperlist-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5em;
+    align-items: center;
+    margin-bottom: 1.5em;
   }
-  populateFilters();
-  renderPapers();
-}
+  .paperlist-slider {
+    width: 320px;
+    max-width: 100%;
+    margin-right: 1em;
+  }
+  .paperlist-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    min-width: 180px;
+  }
+  .chip {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.95em;
+    margin: 2px 4px 2px 0;
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #90caf9;
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .chip.selected {
+    background: #1976d2;
+    color: #fff;
+    border: 1px solid #1976d2;
+  }
+  .chip.type {
+    background: #e8f5e9;
+    color: #388e3c;
+    border: 1px solid #81c784;
+  }
+  .chip.type.selected {
+    background: #388e3c;
+    color: #fff;
+    border: 1px solid #388e3c;
+  }
+  .chip.prior {
+    background: #f5f5f5;
+    color: #757575;
+    border: 1px solid #bdbdbd;
+  }
+  .chip.prior.selected {
+    background: #757575;
+    color: #fff;
+    border: 1px solid #757575;
+  }
+  .paperlist-main {
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+    align-items: flex-start;
+  }
+  .paperlist-list {
+    flex: 1;
+  }
+  .citation {
+    margin: 24px 0;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 24px 24px 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow .2s;
+  }
+  .citation:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  }
+  .citation-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 2px;
+  }
+  .citation-authors {
+    color: #878787;
+    font-size: 1em;
+    margin-bottom: 2px;
+  }
+  .citation-details {
+    color: #555;
+    font-size: 0.98em;
+    margin-bottom: 2px;
+  }
+  .citation-description {
+    color: #666;
+    font-size: 0.97em;
+    margin-bottom: 2px;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  @media (max-width: 900px) {
+    .paperlist-main { flex-direction: column; gap: 1em; }
+    .paperlist-chips { flex-direction: row; flex-wrap: wrap; min-width: unset; }
+  }
+  @media (max-width: 600px) {
+    .citation { padding: 12px 4px; }
+    .paperlist-controls { gap: 0.5em; }
+  }
+  </style>
+  <section class="background" data-size="page">
+    <h1 id="papers">
+      <i class="icon fa-solid fa-scroll"></i> Papers
+    </h1>
+    <p>Our published papers on explainable optimization notes.</p>
+  </section>
+  <section class="background" data-size="page">
+    <div class="paperlist-controls">
+      <input type="text" id="search-input" class="search-input" placeholder="Search papers, authors, abstract..." oninput="renderPapers()">
+      <select id="sort-filter" onchange="renderPapers()">
+        <option value="desc">Newest first</option>
+        <option value="asc">Oldest first</option>
+      </select>
+      <select id="year-filter" onchange="renderPapers()">
+        <option value="">All years</option>
+      </select>
+      <select id="journal-filter" onchange="renderPapers()">
+        <option value="">All journals</option>
+      </select>
+      <button id="reset-filters" class="button" style="display:none;" onclick="resetFilters()">Reset</button>
+    </div>
+    <div class="paperlist-main">
+      <div class="paperlist-list" id="papers-list"></div>
+      <div class="paperlist-chips" id="chip-filters"></div>
+    </div>
+    <div class="search-info" id="search-info"></div>
+  </section>
+  <script>
+  const TYPE_LABELS = [
+    "dynamic / data structure",
+    "online",
+    "running time",
+    "approximation",
+    "streaming",
+    "game theory / mechanism design",
+    "differential privacy",
+    "survey"
+  ];
+  const PRIOR_LABEL = "prior/related work";
+  let papers = [];
+  let selectedLabels = [];
+  fetch('/_data/papers.json')
+    .then(r => r.json())
+    .then(data => {
+      papers = data.filter(p => typeof p === 'object' && p.title);
+      renderFilters();
+      renderPapers();
+    });
 
-function resetFilters() {
-  document.getElementById('search-input').value = '';
-  document.getElementById('year-filter').value = '';
-  document.getElementById('journal-filter').value = '';
-  selectedTags = [];
-  populateFilters();
-  renderPapers();
-}
+  function renderFilters() {
+    // Years
+    const yearSet = new Set();
+    const journalSet = new Set();
+    let allLabels = [];
+    papers.forEach(p => {
+      if (p.year) yearSet.add(p.year);
+      if (p.journal) journalSet.add(p.journal);
+      if (Array.isArray(p.labels)) allLabels = allLabels.concat(p.labels);
+    });
+    const yearFilter = document.getElementById('year-filter');
+    yearFilter.innerHTML = '<option value="">All years</option>';
+    Array.from(yearSet).sort((a,b)=>b-a).forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      yearFilter.appendChild(opt);
+    });
+    const journalFilter = document.getElementById('journal-filter');
+    journalFilter.innerHTML = '<option value="">All journals</option>';
+    Array.from(journalSet).sort().forEach(j => {
+      const opt = document.createElement('option');
+      opt.value = j; opt.textContent = j;
+      journalFilter.appendChild(opt);
+    });
+    // Label chips
+    let distinctLabels = [...new Set(allLabels)].sort();
+    let chipFilters = document.getElementById('chip-filters');
+    chipFilters.innerHTML = '';
+    // Type labels first, then others
+    TYPE_LABELS.concat([PRIOR_LABEL]).forEach(label => {
+      chipFilters.appendChild(labelChip(label, true));
+    });
+    distinctLabels.filter(l => !TYPE_LABELS.includes(l) && l !== PRIOR_LABEL).forEach(label => {
+      chipFilters.appendChild(labelChip(label, true));
+    });
+  }
 
-function clearSearch() {
-  document.getElementById('search-input').value = '';
-  renderPapers();
-}
+  function labelChip(label, deletable) {
+    const span = document.createElement('span');
+    span.className = 'chip';
+    if (TYPE_LABELS.includes(label)) span.classList.add('type');
+    if (label === PRIOR_LABEL) span.classList.add('prior');
+    if (selectedLabels.includes(label)) span.classList.add('selected');
+    span.textContent = label;
+    span.onclick = () => {
+      if (selectedLabels.includes(label)) {
+        selectedLabels = selectedLabels.filter(l => l !== label);
+      } else {
+        selectedLabels = [label, ...selectedLabels];
+      }
+      renderFilters();
+      renderPapers();
+    };
+    return span;
+  }
 
-function renderPapers() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  const year = document.getElementById('year-filter').value;
-  const journal = document.getElementById('journal-filter').value;
-  let filtered = papers.filter(p => {
-    let match = true;
-    if (search) {
-      match = (p.title && p.title.toLowerCase().includes(search)) ||
-              (p.authors && p.authors.toLowerCase().includes(search)) ||
-              (p.abstract && p.abstract.toLowerCase().includes(search));
-    }
-    if (year && p.year != year) match = false;
-    if (journal && p.journal != journal) match = false;
-    if (selectedTags.length > 0) {
-      if (!Array.isArray(p.labels) || !selectedTags.every(t => p.labels.includes(t))) match = false;
-    }
-    return match;
-  });
-  document.getElementById('search-info').textContent = `${filtered.length} papers`;
-  const container = document.getElementById('papers-list');
-  container.innerHTML = '';
-  filtered.forEach(paper => {
-    const div = document.createElement('div');
-    div.className = 'citation';
-    div.innerHTML = `
-      <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
-      <span class="citation-authors">${paper.authors || ''}</span>
-      <span class="citation-details">
-        ${paper.journal ? `<span class='citation-publisher'>${paper.journal}</span> &nbsp;·&nbsp;` : ''}
-        ${paper.year ? `<span class='citation-date'>${paper.year}</span>` : ''}
-      </span>
-      ${paper.abstract ? `<span class="citation-description">${paper.abstract}</span>` : ''}
-      ${Array.isArray(paper.labels) && paper.labels.length ? `<span class='tags'>${paper.labels.map(l=>`<span class='tag'>${l}</span>`).join('')}</span>` : ''}
-    `;
-    container.appendChild(div);
-  });
-  document.getElementById('reset-filters').style.display = (search || year || journal || selectedTags.length) ? '' : 'none';
-}
-</script>
+  function resetFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('year-filter').value = '';
+    document.getElementById('journal-filter').value = '';
+    document.getElementById('sort-filter').value = 'desc';
+    selectedLabels = [];
+    renderFilters();
+    renderPapers();
+  }
+
+  function clearSearch() {
+    document.getElementById('search-input').value = '';
+    renderPapers();
+  }
+
+  function renderPapers() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const year = document.getElementById('year-filter').value;
+    const journal = document.getElementById('journal-filter').value;
+    const sort = document.getElementById('sort-filter').value;
+    let filtered = papers.filter(p => {
+      let match = true;
+      if (search) {
+        match = (p.title && p.title.toLowerCase().includes(search)) ||
+                (p.authors && p.authors.toLowerCase().includes(search)) ||
+                (p.abstract && p.abstract.toLowerCase().includes(search));
+      }
+      if (year && p.year != year) match = false;
+      if (journal && p.journal != journal) match = false;
+      if (selectedLabels.length > 0) {
+        if (!Array.isArray(p.labels) || !selectedLabels.every(t => p.labels.includes(t))) match = false;
+      }
+      return match;
+    });
+    filtered.sort((a, b) => {
+      if (sort === 'desc') return (b.year || 0) - (a.year || 0);
+      else return (a.year || 0) - (b.year || 0);
+    });
+    document.getElementById('search-info').textContent = `${filtered.length} papers`;
+    const container = document.getElementById('papers-list');
+    container.innerHTML = '';
+    filtered.forEach(paper => {
+      const div = document.createElement('div');
+      div.className = 'citation';
+      div.innerHTML = `
+        <span class="citation-title">${paper.url ? `<a href='${paper.url}' target='_blank'>${paper.title}</a>` : paper.title}</span>
+        <span class="citation-authors">${paper.authors || ''}</span>
+        <span class="citation-details">
+          ${paper.journal ? `<span class='citation-publisher'>${paper.journal}</span> &nbsp;·&nbsp;` : ''}
+          ${paper.year ? `<span class='citation-date'>${paper.year}</span>` : ''}
+        </span>
+        ${paper.abstract ? `<span class="citation-description">${paper.abstract}</span>` : ''}
+        ${Array.isArray(paper.labels) && paper.labels.length ? `<span class='tags'>${paper.labels.map(l=>`<span class='tag'>${l}</span>`).join('')}</span>` : ''}
+      `;
+      container.appendChild(div);
+    });
+    document.getElementById('reset-filters').style.display = (search || year || journal || selectedLabels.length) ? '' : 'none';
+  }
+  </script>
