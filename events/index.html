@@ -12,20 +12,20 @@
     .alps-nav { display: flex; gap: 8px; }
     .alps-nav a { color: #fff; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
     .alps-nav a:hover { background: #1976d2; }
-  .events-container { max-width: 1200px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
+  .events-container { max-width: 1400px; margin: 48px auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.10); padding: 48px 36px; }
     .events-container h1 { color: #1976d2; }
-  .event-list { margin: 36px 0 0 0; display: flex; flex-direction: column; gap: 32px; }
-  .event-card { background: #f7f7f7; border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); padding: 0; width: 100%; min-height: 180px; display: flex; flex-direction: row; align-items: stretch; overflow: hidden; }
-  .event-image { flex: 0 0 180px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
-  .event-image img { width: 160px; height: 160px; object-fit: cover; border-radius: 12px; margin: 10px; background: #fff; }
-  .event-details { flex: 1 1 0; padding: 28px 32px; display: flex; flex-direction: column; justify-content: center; }
-  .event-title { font-size: 1.45em; font-weight: bold; color: #1976d2; margin-bottom: 10px; }
-  .event-date { color: #555; font-size: 1.08em; margin-bottom: 4px; }
-  .event-location { color: #888; font-size: 1.05em; margin-bottom: 10px; }
-  .event-description { color: #222; font-size: 1.13em; margin-bottom: 14px; }
-  .event-link { color: #1976d2; text-decoration: none; font-weight: 500; margin-top: 8px; display: inline-block; }
-  .event-link:hover { text-decoration: underline; }
-  @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { gap: 18px; } .event-card { flex-direction: column; min-height: unset; } .event-image { flex-basis: 100px; } .event-image img { width: 90px; height: 90px; } .event-details { padding: 18px 12px; } }
+  .event-list { margin: 48px 0 0 0; display: flex; flex-direction: column; gap: 48px; }
+  .event-card { background: #f7f7f7; border-radius: 22px; box-shadow: 0 2px 16px rgba(0,0,0,0.10); padding: 0; width: 100%; min-height: 260px; display: flex; flex-direction: row; align-items: stretch; overflow: hidden; }
+  .event-image { flex: 0 0 260px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
+  .event-image img { width: 220px; height: 220px; object-fit: cover; border-radius: 16px; margin: 18px; background: #fff; }
+  .event-details { flex: 1 1 0; padding: 44px 48px; display: flex; flex-direction: column; justify-content: center; }
+  .event-title { font-size: 2.1em; font-weight: bold; color: #1976d2; margin-bottom: 18px; }
+  .event-date { color: #555; font-size: 1.25em; margin-bottom: 8px; }
+  .event-location { color: #888; font-size: 1.18em; margin-bottom: 18px; }
+  .event-description { color: #222; font-size: 1.25em; margin-bottom: 18px; }
+  .event-link { color: #1976d2; text-decoration: none; font-weight: 600; margin-top: 16px; font-size: 1.18em; display: inline-block; padding: 10px 24px; border-radius: 8px; background: #e3eafc; transition: background 0.2s; }
+  .event-link:hover { background: #1976d2; color: #fff; text-decoration: none; }
+  @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { gap: 18px; } .event-card { flex-direction: column; min-height: unset; } .event-image { flex-basis: 120px; } .event-image img { width: 100px; height: 100px; } .event-details { padding: 18px 12px; } }
     @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { flex-direction: column; gap: 18px; } .event-card { max-width: 100%; } }
   </style>
 </head>
