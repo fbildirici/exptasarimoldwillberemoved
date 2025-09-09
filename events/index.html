@@ -12,16 +12,20 @@
     .alps-nav { display: flex; gap: 8px; }
     .alps-nav a { color: #fff; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
     .alps-nav a:hover { background: #1976d2; }
-    .events-container { max-width: 900px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
+  .events-container { max-width: 1200px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
     .events-container h1 { color: #1976d2; }
-    .event-list { margin: 36px 0 0 0; display: flex; flex-wrap: wrap; gap: 28px; }
-    .event-card { background: #f7f7f7; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); padding: 24px 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; justify-content: space-between; }
-    .event-title { font-size: 1.25em; font-weight: bold; color: #1976d2; margin-bottom: 8px; }
-    .event-date { color: #555; font-size: 1.05em; margin-bottom: 4px; }
-    .event-location { color: #888; font-size: 1em; margin-bottom: 10px; }
-    .event-description { color: #222; font-size: 1.08em; margin-bottom: 12px; }
-    .event-link { color: #1976d2; text-decoration: none; font-weight: 500; }
-    .event-link:hover { text-decoration: underline; }
+  .event-list { margin: 36px 0 0 0; display: flex; flex-direction: column; gap: 32px; }
+  .event-card { background: #f7f7f7; border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); padding: 0; width: 100%; min-height: 180px; display: flex; flex-direction: row; align-items: stretch; overflow: hidden; }
+  .event-image { flex: 0 0 180px; background: #e0e0e0; display: flex; align-items: center; justify-content: center; }
+  .event-image img { width: 160px; height: 160px; object-fit: cover; border-radius: 12px; margin: 10px; background: #fff; }
+  .event-details { flex: 1 1 0; padding: 28px 32px; display: flex; flex-direction: column; justify-content: center; }
+  .event-title { font-size: 1.45em; font-weight: bold; color: #1976d2; margin-bottom: 10px; }
+  .event-date { color: #555; font-size: 1.08em; margin-bottom: 4px; }
+  .event-location { color: #888; font-size: 1.05em; margin-bottom: 10px; }
+  .event-description { color: #222; font-size: 1.13em; margin-bottom: 14px; }
+  .event-link { color: #1976d2; text-decoration: none; font-weight: 500; margin-top: 8px; display: inline-block; }
+  .event-link:hover { text-decoration: underline; }
+  @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { gap: 18px; } .event-card { flex-direction: column; min-height: unset; } .event-image { flex-basis: 100px; } .event-image img { width: 90px; height: 90px; } .event-details { padding: 18px 12px; } }
     @media (max-width: 900px) { .events-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .event-list { flex-direction: column; gap: 18px; } .event-card { max-width: 100%; } }
   </style>
 </head>
@@ -55,13 +59,25 @@
         events.forEach(event => {
           const card = document.createElement('div');
           card.className = 'event-card';
-          card.innerHTML = `
-            <div class="event-title">${event.title}</div>
-            <div class="event-date"><b>Date:</b> ${event.date}</div>
-            <div class="event-location"><b>Location:</b> ${event.location}</div>
-            <div class="event-description">${event.description}</div>
-            <a class="event-link" href="${event.link}" target="_blank">More Info</a>
-          `;
+          // Optional image: event.image or fallback
+          let imageHTML = `<div class="event-image">`;
+          if (event.image) {
+            imageHTML += `<img src="${event.image}" alt="${event.title}">`;
+          } else {
+            imageHTML += `<img src="/images/event-default.png" alt="Event">`;
+          }
+          imageHTML += `</div>`;
+          let detailsHTML = `<div class="event-details">`;
+          detailsHTML += `<div class="event-title">${event.title}</div>`;
+          detailsHTML += `<div class="event-date"><b>Date:</b> ${event.date}</div>`;
+          detailsHTML += `<div class="event-location"><b>Location:</b> ${event.location}</div>`;
+          if (event.link) {
+            detailsHTML += `<a class="event-link" href="${event.link}" target="_blank">More Info</a>`;
+          } else {
+            detailsHTML += `<div class="event-description">${event.description}</div>`;
+          }
+          detailsHTML += `</div>`;
+          card.innerHTML = imageHTML + detailsHTML;
           list.appendChild(card);
         });
       })
