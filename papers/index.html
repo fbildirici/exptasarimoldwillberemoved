@@ -4,51 +4,102 @@ title: Papers
 permalink: /papers/
 ---
 
+
 <section class="background" data-size="page">
   <h1 id="papers">
     <i class="icon fa-solid fa-scroll"></i> Papers
   </h1>
-  <p>Our published papers on explainable optimization notes fb</p>
+  <p>Our published papers on explainable optimization notes.</p>
 </section>
 
 <section class="background" data-size="page">
   <div class="search-box">
-    <input type="text" class="search-input" oninput="onSearchInput(this)" placeholder="Search papers on this page">
-    <button disabled data-tooltip="Clear search" aria-label="clear search" onclick="onSearchClear()">
+    <input type="text" id="search-input" class="search-input" placeholder="Search papers on this page" oninput="renderPapers()">
+    <button data-tooltip="Clear search" aria-label="clear search" onclick="clearSearch()">
       <i class="icon fa-solid fa-magnifying-glass"></i>
     </button>
   </div>
-  <div class="search-info"></div>
-
-  <div class="citation-container">
-    {% for paper in site.data.papers %}
-      <div class="citation">
-        {% if paper.url %}
-          <a href="{{ paper.url }}" class="citation-title" target="_blank">
-            {{ paper.title }}
-          </a>
-        {% else %}
-          <span class="citation-title">{{ paper.title }}</span>
-        {% endif %}
-        <div class="citation-authors">
-          {{ paper.authors }}
-        </div>
-        <div class="citation-details">
-          {% if paper.journal %}
-            <span class="citation-publisher">{{ paper.journal }}</span>
-            &nbsp;·&nbsp;
-          {% endif %}
-          {% if paper.year %}
-            <span class="citation-date">{{ paper.year }}</span>
-          {% endif %}
-        </div>
-        {% if paper.abstract %}
-          <div class="citation-description">
-            {{ paper.abstract }}
-          </div>
-        {% endif %}
-      </div>
-      <hr>
-    {% endfor %}
+  <div class="search-info" id="search-info"></div>
+  <div class="filter-box">
+    <label for="year-filter">Year:</label>
+    <select id="year-filter" onchange="renderPapers()">
+      <option value="">All</option>
+    </select>
+    <label for="journal-filter">Journal:</label>
+    <select id="journal-filter" onchange="renderPapers()">
+      <option value="">All</option>
+    </select>
   </div>
+  <div class="citation-container" id="papers-list"></div>
 </section>
+<script>
+let papers = [];
+fetch('/_data/papers.json')
+  .then(r => r.json())
+  .then(data => {
+    // Remove any non-object entries (e.g., accidental HTML string at start)
+    papers = data.filter(p => typeof p === 'object' && p.title);
+    populateFilters();
+    renderPapers();
+  });
+
+function populateFilters() {
+  const yearSet = new Set();
+  const journalSet = new Set();
+  papers.forEach(p => {
+    if (p.year) yearSet.add(p.year);
+    if (p.journal) journalSet.add(p.journal);
+  });
+  const yearFilter = document.getElementById('year-filter');
+  Array.from(yearSet).sort((a,b)=>b-a).forEach(y => {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    yearFilter.appendChild(opt);
+  });
+  const journalFilter = document.getElementById('journal-filter');
+  Array.from(journalSet).sort().forEach(j => {
+    const opt = document.createElement('option');
+    opt.value = j; opt.textContent = j;
+    journalFilter.appendChild(opt);
+  });
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  renderPapers();
+}
+
+function renderPapers() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const year = document.getElementById('year-filter').value;
+  const journal = document.getElementById('journal-filter').value;
+  let filtered = papers.filter(p => {
+    let match = true;
+    if (search) {
+      match = (p.title && p.title.toLowerCase().includes(search)) ||
+              (p.authors && p.authors.toLowerCase().includes(search)) ||
+              (p.abstract && p.abstract.toLowerCase().includes(search));
+    }
+    if (year && p.year != year) match = false;
+    if (journal && p.journal != journal) match = false;
+    return match;
+  });
+  document.getElementById('search-info').textContent = `${filtered.length} papers`;
+  const container = document.getElementById('papers-list');
+  container.innerHTML = '';
+  filtered.forEach(paper => {
+    const div = document.createElement('div');
+    div.className = 'citation';
+    let title = paper.url ? `<a href="${paper.url}" class="citation-title" target="_blank">${paper.title}</a>` : `<span class="citation-title">${paper.title}</span>`;
+    let authors = `<div class="citation-authors">${paper.authors}</div>`;
+    let details = `<div class="citation-details">`;
+    if (paper.journal) details += `<span class="citation-publisher">${paper.journal}</span> &nbsp;·&nbsp;`;
+    if (paper.year) details += `<span class="citation-date">${paper.year}</span>`;
+    details += `</div>`;
+    let abstract = paper.abstract ? `<div class="citation-description">${paper.abstract}</div>` : '';
+    div.innerHTML = `${title}${authors}${details}${abstract}`;
+    container.appendChild(div);
+    container.appendChild(document.createElement('hr'));
+  });
+}
+</script>
