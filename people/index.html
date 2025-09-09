@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>People</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; }
+    .alps-header { background: #111; color: #fff; margin: 0 0 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .alps-header-bar { display: flex; align-items: center; padding: 0 24px; height: 64px; }
+    .alps-title { font-size: 2rem; font-weight: bold; margin-right: 32px; color: #fff; text-decoration: none; }
+    .alps-nav { display: flex; gap: 8px; }
+    .alps-nav a { color: #fff; text-decoration: none; font-weight: 500; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+    .alps-nav a:hover { background: #1976d2; }
+    .people-md-container { max-width: 800px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
+    .people-md-container h1, .people-md-container h2, .people-md-container h3 { color: #1976d2; }
+    .people-md-container table { width: 100%; border-collapse: collapse; margin: 32px 0 0 0; }
+    .people-md-container th, .people-md-container td { padding: 14px 12px; border-bottom: 1.5px solid #e0e0e0; vertical-align: top; }
+    .people-md-container th { background: #f3f7fa; color: #1976d2; font-size: 1.1em; text-align: left; }
+    .people-md-container td img { width: 72px; height: 72px; object-fit: cover; border-radius: 50%; border: 2px solid #1976d2; background: #eee; }
+    .people-md-container .person-info { font-size: 1.08em; color: #222; }
+    .people-md-container .person-info b { color: #1976d2; }
+    .people-md-container a { color: #1976d2; text-decoration: none; }
+    .people-md-container a:hover { text-decoration: underline; }
+    @media (max-width: 900px) { .people-md-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="alps-header">
+    <div class="alps-header-bar">
+      <a class="alps-title" href="/">ExpOpt</a>
+      <nav class="alps-nav">
+        <a href="/">Home</a>
+        <a href="/papers/">Papers</a>
+        <a href="/projects/">Projects</a>
+        <a href="/people/">People</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </div>
+  <div class="people-md-container" id="people-md"></div>
+  <script type="text/markdown" id="people-md-src">
+# People
+
+Meet our team:
+
+| Photo | Info |
+|:-----:|------|
+| ![](https://randomuser.me/api/portraits/men/32.jpg) | **Dr. John Doe**  
+Principal Investigator  
+[john.doe@email.com](mailto:john.doe@email.com)  
+[LinkedIn](https://linkedin.com/in/johndoe)  |
+| ![](https://randomuser.me/api/portraits/women/44.jpg) | **Jane Smith**  
+PhD Student  
+[jane.smith@email.com](mailto:jane.smith@email.com)  
+[Twitter](https://twitter.com/janesmith)  |
+| ![](https://randomuser.me/api/portraits/men/65.jpg) | **Ali Veli**  
+Research Assistant  
+[ali.veli@email.com](mailto:ali.veli@email.com)  |
+
+---
+
+*For collaboration or inquiries, see the [Contact](/contact/) page.*
+  </script>
+  <script>
+    // Render markdown to HTML
+    const md = document.getElementById('people-md-src').textContent;
+    document.getElementById('people-md').innerHTML = marked.parse(md);
+  </script>
+</body>
+</html>
