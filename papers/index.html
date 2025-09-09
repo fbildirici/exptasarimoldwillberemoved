@@ -236,60 +236,56 @@
   <div class="paperlist-container">
     <div class="paperlist-main">
       <div class="paperlist-controls">
-        <div class="paperlist-slider" style="position:relative;height:48px;">
-          <input type="range" id="year-range-min" min="0" max="0" value="0" step="1" class="slider dual-slider" style="position:absolute;left:0;top:16px;width:100%;z-index:3;">
-          <input type="range" id="year-range-max" min="0" max="0" value="0" step="1" class="slider dual-slider" style="position:absolute;left:0;top:16px;width:100%;z-index:2;">
-          <div class="slider-track" id="slider-track" style="position:absolute;left:0;top:28px;width:100%;height:4px;background:#eee;border-radius:2px;z-index:1;"></div>
-          <div class="slider-labels" id="year-slider-labels" style="position:absolute;left:0;top:0;width:100%;"></div>
+        <div class="paperlist-slider" style="position:relative;height:60px;">
+          <input type="range" id="year-range-min" min="0" max="0" value="0" step="1" style="width:100%;margin-top:24px;">
+          <input type="range" id="year-range-max" min="0" max="0" value="0" step="1" style="width:100%;margin-top:24px;position:absolute;left:0;top:0;pointer-events:none;opacity:0;">
+          <div class="slider-labels" id="year-slider-labels" style="margin-top:2px;"></div>
         </div>
-    .slider.dual-slider {
+
+    input[type=range] {
       -webkit-appearance: none;
-      appearance: none;
-      height: 0;
-      background: none;
-      pointer-events: all;
-    }
-    .slider.dual-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #1976d2;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      cursor: pointer;
-      margin-top: -7px;
-      transition: background 0.2s;
-    }
-    .slider.dual-slider::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #1976d2;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .slider.dual-slider::-ms-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #1976d2;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .slider.dual-slider:focus {
+      width: 100%;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
       outline: none;
+      margin: 0;
+      padding: 0;
     }
-    .slider-track {
-      background: linear-gradient(90deg, #eee 0%, #1976d2 0%, #1976d2 100%, #eee 100%);
-      height: 4px;
-      border-radius: 2px;
-      z-index: 1;
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1976d2;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1976d2;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    input[type=range]::-ms-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1976d2;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    input[type=range]:focus {
+      outline: none;
     }
         <select id="sort-filter" class="paperlist-sort">
           <option value="desc">Newest first</option>
@@ -348,27 +344,17 @@
     function renderYearSlider() {
       const minSlider = document.getElementById('year-range-min');
       const maxSlider = document.getElementById('year-range-max');
-      const track = document.getElementById('slider-track');
       minSlider.min = 0;
       minSlider.max = allYears.length-1;
       minSlider.value = 0;
       maxSlider.min = 0;
       maxSlider.max = allYears.length-1;
       maxSlider.value = allYears.length-1;
-      function updateTrack() {
-        let min = parseInt(minSlider.value);
-        let max = parseInt(maxSlider.value);
-        if (min > max) min = max;
-        const percentMin = (min/(allYears.length-1))*100;
-        const percentMax = (max/(allYears.length-1))*100;
-        track.style.background = `linear-gradient(90deg, #eee 0%, #1976d2 ${percentMin}%, #1976d2 ${percentMax}%, #eee 100%)`;
-      }
       minSlider.oninput = function() {
         if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
           minSlider.value = maxSlider.value;
         }
         yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
-        updateTrack();
         renderYearLabels();
         renderPapers();
       };
@@ -377,12 +363,10 @@
           maxSlider.value = minSlider.value;
         }
         yearRange = [allYears[minSlider.value], allYears[maxSlider.value]];
-        updateTrack();
         renderYearLabels();
         renderPapers();
       };
       yearRange = [allYears[0], allYears[allYears.length-1]];
-      updateTrack();
       renderYearLabels();
     }
     function renderYearLabels() {
