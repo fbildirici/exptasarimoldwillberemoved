@@ -15,15 +15,15 @@
     .alps-nav a:hover { background: #1976d2; }
     .people-md-container { max-width: 800px; margin: 48px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 36px 28px; }
     .people-md-container h1, .people-md-container h2, .people-md-container h3 { color: #1976d2; }
-    .people-md-container table { width: 100%; border-collapse: collapse; margin: 32px 0 0 0; }
-    .people-md-container th, .people-md-container td { padding: 14px 12px; border-bottom: 1.5px solid #e0e0e0; vertical-align: top; }
-    .people-md-container th { background: #f3f7fa; color: #1976d2; font-size: 1.1em; text-align: left; }
-    .people-md-container td img { width: 72px; height: 72px; object-fit: cover; border-radius: 50%; border: 2px solid #1976d2; background: #eee; }
-    .people-md-container .person-info { font-size: 1.08em; color: #222; }
-    .people-md-container .person-info b { color: #1976d2; }
-    .people-md-container a { color: #1976d2; text-decoration: none; }
-    .people-md-container a:hover { text-decoration: underline; }
-    @media (max-width: 900px) { .people-md-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } }
+    .person-table { width: 100%; border-collapse: separate; border-spacing: 0 24px; margin: 32px 0 0 0; }
+    .person-row { background: #f7f7f7; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .person-photo { width: 120px; padding: 0 24px 0 0; vertical-align: top; }
+    .person-photo img { width: 96px; height: 96px; object-fit: cover; border-radius: 50%; border: 2px solid #1976d2; background: #eee; display: block; margin: 0 auto; }
+    .person-info { font-size: 1.08em; color: #222; padding-top: 8px; }
+    .person-info b { color: #1976d2; font-size: 1.13em; }
+    .person-info a { color: #1976d2; text-decoration: none; }
+    .person-info a:hover { text-decoration: underline; }
+    @media (max-width: 900px) { .people-md-container { padding: 18px 4vw; } .alps-header-bar { flex-direction: column; height: auto; padding: 12px 4vw; } .alps-title { margin-bottom: 8px; } .person-photo { width: 80px; padding-right: 10px; } .person-photo img { width: 64px; height: 64px; } }
   </style>
 </head>
 <body>
@@ -39,34 +39,39 @@
       </nav>
     </div>
   </div>
-  <div class="people-md-container" id="people-md"></div>
-  <script type="text/markdown" id="people-md-src">
-# People
-
-Meet our team:
-
-| Photo | Info |
-|:-----:|------|
-| ![](https://randomuser.me/api/portraits/men/32.jpg) | **Dr. John Doe**  
-Principal Investigator  
-[john.doe@email.com](mailto:john.doe@email.com)  
-[LinkedIn](https://linkedin.com/in/johndoe)  |
-| ![](https://randomuser.me/api/portraits/women/44.jpg) | **Jane Smith**  
-PhD Student  
-[jane.smith@email.com](mailto:jane.smith@email.com)  
-[Twitter](https://twitter.com/janesmith)  |
-| ![](https://randomuser.me/api/portraits/men/65.jpg) | **Ali Veli**  
-Research Assistant  
-[ali.veli@email.com](mailto:ali.veli@email.com)  |
-
----
-
-*For collaboration or inquiries, see the [Contact](/contact/) page.*
-  </script>
-  <script>
-    // Render markdown to HTML
-    const md = document.getElementById('people-md-src').textContent;
-    document.getElementById('people-md').innerHTML = marked.parse(md);
-  </script>
+  <div class="people-md-container">
+    <h1>People</h1>
+    <div style="margin-bottom:24px;color:#444;font-size:1.13em;">Meet our team:</div>
+    <table class="person-table">
+      <tr class="person-row">
+        <td class="person-photo"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Dr. John Doe"></td>
+        <td class="person-info">
+          <b>Dr. John Doe</b><br>
+          Principal Investigator<br>
+          <a href="mailto:john.doe@email.com">john.doe@email.com</a><br>
+          <a href="https://linkedin.com/in/johndoe" target="_blank">LinkedIn</a>
+        </td>
+      </tr>
+      <tr class="person-row">
+        <td class="person-photo"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith"></td>
+        <td class="person-info">
+          <b>Jane Smith</b><br>
+          PhD Student<br>
+          <a href="mailto:jane.smith@email.com">jane.smith@email.com</a><br>
+          <a href="https://twitter.com/janesmith" target="_blank">Twitter</a>
+        </td>
+      </tr>
+      <tr class="person-row">
+        <td class="person-photo"><img src="https://randomuser.me/api/portraits/men/65.jpg" alt="Ali Veli"></td>
+        <td class="person-info">
+          <b>Ali Veli</b><br>
+          Research Assistant<br>
+          <a href="mailto:ali.veli@email.com">ali.veli@email.com</a>
+        </td>
+      </tr>
+    </table>
+    <hr style="margin:32px 0 18px 0; border:none; border-top:1.5px solid #e0e0e0;"/>
+    <div style="font-size:1.08em; color:#444; margin-bottom:10px;">For collaboration or inquiries, see the <a href="/contact/">Contact</a> page.</div>
+  </div>
 </body>
 </html>
