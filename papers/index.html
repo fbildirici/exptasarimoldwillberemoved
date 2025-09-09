@@ -15,7 +15,7 @@
       background: #f7f7f7;
     }
     .alps-header {
-      background: #455a64;
+      background: #111;
       color: #fff;
       padding: 0;
       margin-bottom: 24px;
@@ -193,10 +193,10 @@
       gap: 8px;
     }
     .sidebar-label {
-      font-size: 1.08em;
-      font-weight: 500;
+      font-size: 0.98em;
+      font-weight: bold;
       margin-bottom: 6px;
-      color: #333;
+      color: #111;
     }
     .sidebar-chips {
       display: flex;
@@ -368,7 +368,12 @@
       for (let i = 0; i < idxs.length; ++i) {
         const idx = idxs[i];
         const percent = (idx / (allYears.length - 1)) * 100;
-        html += `<span class="alps-slider-label" style="left:${percent}%;transform:translateX(-50%);">'${String(allYears[idx]).slice(-2)}</span>`;
+        // Show full year for the first label under the left thumb
+        if (idx === 0) {
+          html += `<span class=\"alps-slider-label\" style=\"left:${percent}%;transform:translateX(-10%);font-weight:bold;\">${allYears[idx]}</span>`;
+        } else {
+          html += `<span class=\"alps-slider-label\" style=\"left:${percent}%;transform:translateX(-50%);\">'${String(allYears[idx]).slice(-2)}</span>`;
+        }
       }
       html += '</div>';
       labelsCont.innerHTML = html;
