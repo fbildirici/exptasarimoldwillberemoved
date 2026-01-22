@@ -1,81 +1,13 @@
----
----
+Aşağıda, SAP Excel makro tabanlı “Değişiklik Önerisi Başlat” sisteminin tamamını, kod, arayüz, iş akışı, SAP entegrasyonu, hata yönetimi ve kullanıcı deneyimi dahil olmak üzere, hiçbir başlık veya maddeleme olmadan, serbest ve en geniş anlatımla bulabilirsin:
 
-# The World of Explainable Optimization
+Bu sistem, Excel üzerinde çalışan, SAP ile entegre, makro ve kullanıcı formlarıyla yönetilen bir değişiklik önerisi ve iş planı otomasyon platformudur. Kullanıcı, Excel dosyasını açtığında ilk olarak bir şifre ekranı ile karşılaşır. Doğru şifre girilmeden ana ekrana erişim mümkün değildir. Şifre doğrulandıktan sonra UserForm1 adı verilen ana form açılır. Bu formda kullanıcıdan proje kodu, stok doküman türü, doküman adı (uzantılı olarak), birinci ve ikinci amir, tanım, açıklama, kazanç gibi temel bilgiler istenir. Ayrıca, değişiklik nedenleri matris şeklinde CheckBox’lar ile sunulur; kullanıcı, doküman, tasarım, üretim, satın alma, pazarlama gibi nedenlerden bir veya birkaçını seçmek zorundadır. Uygulama bilgisi bölümünde ise, değişikliğin açık üretim siparişlerine, üst takıma veya piyasa satınalma siparişlerine uygulanıp uygulanmayacağı CheckBox’lar ve ilgili TextBox’lar ile belirtilir. Kullanıcı, değişiklik önerisinin kaç nesne için geçerli olacağını ComboBox ile seçer. Arayüzde, dosya uzantısı, dosya yolu, nesne ekleme ile ilgili uyarı ve açıklamalar da yer alır; örneğin, kopyalanacak dosyaların C:\ dizinine eklenmesi gerektiği, doküman adının uzantı içermesi gerektiği ve sadece nesne eklenip ek olmayacaksa doküman adının boş bırakılabileceği gibi.
 
-We are a team of researchers working on exlainable optimization (XOpt) at the University of Amsterdam (UvA). We maintain this website to collect and promote recent research on XOpt. Please feel free to reach us if you would like to see your work listed here.
+Kullanıcı, tüm gerekli alanları doldurduktan ve en az bir değişiklik nedeni seçtikten sonra “Değişiklik Önerisi Başlat” butonuna basar. Bu buton, arka planda DO_Baslat adlı fonksiyonu tetikler. Fonksiyonun ilk adımı, temel veri kontrolüdür; proje kodu, doküman adı, amirler, tanım, açıklama, kazanç gibi alanlardan herhangi biri boşsa kullanıcıya “Temel Veriler Eksik, Öneri Başlatılamaz...” uyarısı verilir ve işlem durur. İkinci adımda, değişiklik nedeni kontrolü yapılır; matris şeklindeki CheckBox’lardan hiçbiri seçili değilse “Değişiklik Nedeni Eksik, Öneri Başlatılamaz...” uyarısı verilir ve işlem durur. Üçüncü adımda, uygulama bilgisi kontrolü yapılır; seçili kutulara karşılık gelen TextBox’lar boşsa “Uygulama Bilgisi Eksik, Öneri Başlatılamaz...” uyarısı verilir ve işlem durur. Dördüncü adımda, nesne girişi kontrolü yapılır; ComboBox ile seçilen nesne adedine göre ilgili TextBox’lar dolu olmalıdır, aksi halde “Eksik nesne girişi...” uyarısı verilir ve işlem durur. Beşinci adımda, dosya adı kontrolü yapılır; doküman adı alanı “GÜNCEL DOKÜMAN ADI YAZILI OLMALIDIR, YOKSA HATA...” ise veya dosya uzantısı yoksa “Program Hatası... Exceli kapatıp açınız...” uyarısı verilir ve işlem durur.
 
-{% include section.html %}
+Tüm bu kontroller geçildikten sonra, SAP GUI scripting ile SAP’ye otomatik olarak bağlanılır. Kodda, SapGuiAuto, Connection ve session nesneleri oluşturulur. SAP GUI oturumu açılır, gerekli SAP ekranları ve alanları doldurulur, SAP’ye veri gönderilir ve değişiklik önerisi işlemi başlatılır. SAP işlemleri tamamlandıktan sonra oturum sonlandırılır. Aynı zamanda, girilen veriler Excel hücrelerine yazılır, dosya ve dizin kontrolleri yapılır, gerekirse yeni dosya veya dizin oluşturulur. Her adımda, eksik veri veya hata olması durumunda kullanıcıya anında uyarı mesajı gösterilir; işlem başarılıysa bilgi mesajı verilir.
 
-## Highlights
+Sistemde, her bir TextBox, CheckBox ve ComboBox, DO_Baslat fonksiyonunda birebir kontrol edilir. Kullanıcıdan alınan veriler hem SAP’ye hem de Excel’e aktarılır. Arayüzdeki uyarılar ve açıklamalar, kodda yapılan kontrollerle birebir örtüşür. MultiPage ve sekmeler ile farklı işlevlere geçiş sağlanır; örneğin iş planı, test seti, ürün ağacı, doküman aktarma gibi işlemler için ayrı sekmeler ve butonlar bulunur. Her bir işlev, ilgili modüldeki fonksiyon ile tetiklenir ve SAP/Excel üzerinde işlem yapar. SAP GUI scripting ile otomatik oturum açılır, kullanıcı adı ve şifre ile SAP’ye giriş yapılır, gerekli SAP ekranları açılır ve veriler doldurulur, SAP’de değişiklik önerisi, iş planı, ürün ağacı, doküman aktarma gibi işlemler başlatılır ve oturum sonlandırılır.
 
-{% capture text %}
+Sistemde hata yönetimi çok önemlidir; her adımda eksik veri veya hata kontrolü yapılır, kullanıcıya anında uyarı veya bilgi mesajı gösterilir, SAP ve Excel işlemlerinde hata olursa işlem durdurulur ve kullanıcı bilgilendirilir. Kodda modüler bir yapı vardır; her işlev ayrı bir modülde kodlanmıştır ve her buton ve alan, ilgili modül fonksiyonunu tetikler. Kullanıcı deneyimi açısından sistem, kolay ve hızlı veri girişi, otomatik SAP ve Excel işlemleri, hatalara karşı anında uyarı ve tüm işlemlerin tek bir arayüzden yönetilebilmesi gibi avantajlar sunar. Yardımcı notlar ve açıklamalar ile kullanıcı sürekli yönlendirilir.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-{%
-  include button.html
-  link="research"
-  text="See our publications"
-  icon="fa-solid fa-arrow-right"
-  flip=true
-  style="bare"
-%}
-
-{% endcapture %}
-
-{%
-  include feature.html
-  image="images/photo.jpg"
-  link="research"
-  title="Our Research"
-  text=text
-%}
-
-{% capture text %}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-{%
-  include button.html
-  link="projects"
-  text="Browse our projects"
-  icon="fa-solid fa-arrow-right"
-  flip=true
-  style="bare"
-%}
-
-{% endcapture %}
-
-{%
-  include feature.html
-  image="images/photo.jpg"
-  link="projects"
-  title="Our Projects"
-  flip=true
-  style="bare"
-  text=text
-%}
-
-{% capture text %}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-{%
-  include button.html
-  link="team"
-  text="Meet our team"
-  icon="fa-solid fa-arrow-right"
-  flip=true
-  style="bare"
-%}
-
-{% endcapture %}
-
-{%
-  include feature.html
-  image="images/photo.jpg"
-  link="team"
-  title="Our Team"
-  text=text
-%}
+Kullanıcı, sistemdeki tüm işlemleri tek bir arayüzden yönetebilir; değişiklik önerisi başlatma, iş planı oluşturma, test seti işlemleri, ürün ağacı yaratma, doküman aktarma gibi tüm SAP ve Excel işlemleri, ilgili sekmeler ve butonlar üzerinden kolayca yapılabilir. Her işlemde, kullanıcıdan alınan veriler hem SAP’ye hem de Excel’e aktarılır, işlemler otomatik olarak yürütülür ve kullanıcıya işlem sonucu anında bildirilir. Sistem, SAP ile tam entegre çalışır ve tüm iş akışını otomatikleştirir.
